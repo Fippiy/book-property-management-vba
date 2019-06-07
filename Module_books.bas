@@ -3,60 +3,140 @@ Option Explicit
 
 
 Sub getBookdata()
-    '‹ŒƒRƒƒ“ƒgíœ
+    Dim objIE As InternetExplorer 'IEã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æº–å‚™
+    Set objIE = CreateObject("Internetexplorer.Application") 'æ–°ã—ã„IEã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã—ã¦ã‚»ãƒƒãƒˆ
+    objIE.Visible = True 'IEã‚’è¡¨ç¤º
+    objIE.navigate "https://protected-fortress-61913.herokuapp.com/book" 'IEã§URLã‚’é–‹ã
+    
+    Call WaitResponse(objIE) 'èª­ã¿è¾¼ã¿å¾…ã¡
+    
+    Dim htmlDoc As HTMLDocument 'HTMLãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æº–å‚™
+    Set htmlDoc = objIE.document 'objIEã§èª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹HTMLãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚’ã‚»ãƒƒãƒˆ
+    
+'    test = htmlDoc.getElementsByClassName("list-book-title")
+    
+'     ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒœãƒƒã‚¯ã‚¹ã«å–å¾—ã‚¯ãƒ©ã‚¹ã®æœ€åˆã®æ–‡å­—ã‚’å‡ºåŠ›
+'    MsgBox htmlDoc.getElementsByClassName("list-book-title")(0).innerHTML
+'    Debug.Print htmlDoc.getElementsByClassName("list-book-title")(0).innerHTML
+    
+'     ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒœãƒƒã‚¯ã‚¹ã«å–å¾—ã‚¯ãƒ©ã‚¹ã®å­è¦ç´ ã‚’å–å¾—å‡ºåŠ›
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).outerHTML
+'    Debug.Print htmlDoc.getElementsByClassName("list-book-detail")(0).innerHTML
 
-    Dim objIE As InternetExplorer 'IEƒIƒuƒWƒFƒNƒg‚ğ€”õ
-    Set objIE = CreateObject("Internetexplorer.Application") 'V‚µ‚¢IEƒIƒuƒWƒFƒNƒg‚ğì¬‚µ‚ÄƒZƒbƒg
-    
-    objIE.Visible = False 'IE‚ğ•\¦AFalse‚ÅIE•\¦‚È‚µ
-    
-    objIE.navigate "https://protected-fortress-61913.herokuapp.com/book" 'IE‚ÅURL‚ğŠJ‚­
-    
-    Call WaitResponse(objIE) '“Ç‚İ‚İ‘Ò‚¿
 
-    Dim htmlDoc As HTMLDocument 'HTMLƒhƒLƒ…ƒƒ“ƒgƒIƒuƒWƒFƒNƒg‚ğ€”õ
-    Set htmlDoc = objIE.document 'objIE‚Å“Ç‚İ‚Ü‚ê‚Ä‚¢‚éHTMLƒhƒLƒ…ƒƒ“ƒg‚ğƒZƒbƒg
-  
-''    ƒf[ƒ^æ“¾‚Ü‚Æ‚ß
+
+
+'    ã‚¯ãƒ©ã‚¹åå†…ã®è¦ç´ é…ä¸‹ã®ã‚¿ã‚°åã®ä¸­èº«ã‚’å–å¾—
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0).innerHTML
+
+
+
+
+'    ã‚¯ãƒ©ã‚¹åå†…ã®è¦ç´ é…ä¸‹ã®aã‚¿ã‚°è¦ç´ ã‚’å–å¾—(URL)
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0)
+
+
+
+
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).innerHTML
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")
+'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).outerHTML.getElementsByTagName("a")
+    
+'    ãƒ‡ãƒ¼ã‚¿å–å¾—ã¾ã¨ã‚
 '    Debug.Print "1." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).innerHTML
 '    Debug.Print "2." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")
 '    Debug.Print "3." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("h3")
 '    Debug.Print "4." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("p")
     
-
-    ' ƒV[ƒgã‚Éw’èƒNƒ‰ƒX‚Ì‘Sæ“¾ƒeƒLƒXƒg‚ğ•\¦
-    Dim Str As Object
-    Dim i As Integer
     
-    'ƒ^ƒCƒgƒ‹–¼æ“¾
+    ' ã‚¤ãƒŸãƒ‡ã‚£ã‚¨ã‚¤ãƒˆã«æŒ‡å®šã‚¯ãƒ©ã‚¹ã®å…¨å–å¾—ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤º
+'    Dim Str As Variant
+'    For Each Str In htmlDoc.getElementsByClassName("list-book-title")
+''        Debug.Print "å‡ºåŠ›ï¼š" & Str.innerHTML
+'    Next Str
+
+
+
+
+'    test = htmlDoc.getElementsByClassName("list-book-title")
+'    Debug.Print UBound(test, 2)
+
+
+
+
+
+
+
+
+''    ' ã‚·ãƒ¼ãƒˆä¸Šã«æŒ‡å®šã‚¯ãƒ©ã‚¹ã®å…¨å–å¾—ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤º
+    Dim Str As Variant
+    Dim i As Integer
     i = 1
     For Each Str In htmlDoc.getElementsByClassName("list-book-title")
-        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 1).Value = i
-        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 2).Value = Str.innerHTML
+'        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 1).Value = i
+        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 2).Value = Str.innerHTML
         i = i + 1
+'        Debug.Print "å‡ºåŠ›ï¼š" & Str.innerHTML
     Next Str
 
-    'detailæ“¾
+
+    'æ›¸ç±è©³ç´°
     i = 1
     For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
-        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 3).Value = Str.innerHTML
+        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 3).Value = Str.innerHTML
         i = i + 1
     Next Str
 
-    'URLæ“¾
+
+'    i = 1
+'    Dim Arr As Variant
+'    ReDim Arr(20)
+'    Arr = htmlDoc.getElementsByClassName("list-book-detail")
+'    Range("A2").Value = Arr
+
+
+    'URL
     i = 1
+'    htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0)
+'    For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
+    Dim GetUrl As String
+    Dim GetUrlData() As String
+    Dim GetUrlElement As Integer
+    Dim GetID As Integer
+    
     For Each Str In htmlDoc.getElementsByClassName("book-table__list--detail")
-        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 4).Value = Str.getElementsByTagName("a")
-        i = i + 1
+        GetUrl = Str.getElementsByTagName("a")  'URLå–å¾—
+        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 4).Value = GetUrl  'å–å¾—URLåæ˜ 
+        GetUrlData = Split(GetUrl, "/")  'URLè¦ç´ å–å¾—
+        GetUrlElement = UBound(GetUrlData)  'URLè¦ç´ ç¢ºèª
+        GetID = GetUrlData(GetUrlElement)  'URLã‹ã‚‰ç•ªå·å–å¾—
+        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 1).Value = GetID  'ãƒ¯ãƒ¼ã‚¯ã‚·ãƒ¼ãƒˆã¸åæ˜ 
+        i = i + 1  'æ¬¡ã®è¡ŒæŒ‡å®š
     Next Str
 
-    objIE.Quit 'objIE‚ğI—¹‚³‚¹‚é
-    MsgBox "ƒf[ƒ^æ“¾‚ªŠ®—¹‚µ‚Ü‚µ‚½B"
 
+'    Dim test As String
+''    test = "aa/bb/cc/dd"
+'    test = "https://protected-fortress-61913.herokuapp.com/book"
+'    test2 = Split(test, "/")
+'    Debug.Print test
+'    Debug.Print test2(0)
+'    Debug.Print test2(1)
+'    Debug.Print test2(2)
+'    Debug.Print test2(3)
+'    Debug.Print UBound(test2)
+
+
+'book-table__list--detail
+
+
+
+
+    objIE.Quit 'objIEã‚’çµ‚äº†ã•ã›ã‚‹
+    Debug.Print "ãƒ‡ãƒ¼ã‚¿å–å¾—ãŒå®Œäº†ã—ã¾ã—ãŸã€‚"
 End Sub
 Sub WaitResponse(objIE As Object)
-    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '“Ç‚İ‚İ‘Ò‚¿
+    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE 'èª­ã¿è¾¼ã¿å¾…ã¡
         DoEvents
     Loop
 End Sub
-
