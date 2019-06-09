@@ -3,140 +3,153 @@ Option Explicit
 
 
 Sub getBookdata()
-    Dim objIE As InternetExplorer 'IEã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æº–å‚™
-    Set objIE = CreateObject("Internetexplorer.Application") 'æ–°ã—ã„IEã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆã—ã¦ã‚»ãƒƒãƒˆ
-    objIE.Visible = True 'IEã‚’è¡¨ç¤º
-    objIE.navigate "https://protected-fortress-61913.herokuapp.com/book" 'IEã§URLã‚’é–‹ã
+    Dim objIE As InternetExplorer 'IEƒIƒuƒWƒFƒNƒg‚ğ€”õ
+    Set objIE = CreateObject("Internetexplorer.Application") 'V‚µ‚¢IEƒIƒuƒWƒFƒNƒg‚ğì¬‚µ‚ÄƒZƒbƒg
+    objIE.Visible = True 'IE‚ğ•\¦
+    objIE.navigate "https://protected-fortress-61913.herokuapp.com/book" 'IE‚ÅURL‚ğŠJ‚­
     
-    Call WaitResponse(objIE) 'èª­ã¿è¾¼ã¿å¾…ã¡
+    Call WaitResponse(objIE) '“Ç‚İ‚İ‘Ò‚¿
     
-    Dim htmlDoc As HTMLDocument 'HTMLãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æº–å‚™
-    Set htmlDoc = objIE.document 'objIEã§èª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹HTMLãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚’ã‚»ãƒƒãƒˆ
+    Dim htmlDoc As HTMLDocument 'HTMLƒhƒLƒ…ƒƒ“ƒgƒIƒuƒWƒFƒNƒg‚ğ€”õ
+    Set htmlDoc = objIE.document 'objIE‚Å“Ç‚İ‚Ü‚ê‚Ä‚¢‚éHTMLƒhƒLƒ…ƒƒ“ƒg‚ğƒZƒbƒg
     
-'    test = htmlDoc.getElementsByClassName("list-book-title")
-    
-'     ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒœãƒƒã‚¯ã‚¹ã«å–å¾—ã‚¯ãƒ©ã‚¹ã®æœ€åˆã®æ–‡å­—ã‚’å‡ºåŠ›
-'    MsgBox htmlDoc.getElementsByClassName("list-book-title")(0).innerHTML
-'    Debug.Print htmlDoc.getElementsByClassName("list-book-title")(0).innerHTML
-    
-'     ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒœãƒƒã‚¯ã‚¹ã«å–å¾—ã‚¯ãƒ©ã‚¹ã®å­è¦ç´ ã‚’å–å¾—å‡ºåŠ›
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).outerHTML
-'    Debug.Print htmlDoc.getElementsByClassName("list-book-detail")(0).innerHTML
-
-
-
-
-'    ã‚¯ãƒ©ã‚¹åå†…ã®è¦ç´ é…ä¸‹ã®ã‚¿ã‚°åã®ä¸­èº«ã‚’å–å¾—
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0).innerHTML
-
-
-
-
-'    ã‚¯ãƒ©ã‚¹åå†…ã®è¦ç´ é…ä¸‹ã®aã‚¿ã‚°è¦ç´ ã‚’å–å¾—(URL)
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0)
-
-
-
-
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).innerHTML
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")
-'    Debug.Print htmlDoc.getElementsByClassName("book-table__list--detail")(0).outerHTML.getElementsByTagName("a")
-    
-'    ãƒ‡ãƒ¼ã‚¿å–å¾—ã¾ã¨ã‚
-'    Debug.Print "1." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).innerHTML
-'    Debug.Print "2." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")
-'    Debug.Print "3." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("h3")
-'    Debug.Print "4." & htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("p")
-    
-    
-    ' ã‚¤ãƒŸãƒ‡ã‚£ã‚¨ã‚¤ãƒˆã«æŒ‡å®šã‚¯ãƒ©ã‚¹ã®å…¨å–å¾—ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤º
-'    Dim Str As Variant
-'    For Each Str In htmlDoc.getElementsByClassName("list-book-title")
-''        Debug.Print "å‡ºåŠ›ï¼š" & Str.innerHTML
-'    Next Str
-
-
-
-
-'    test = htmlDoc.getElementsByClassName("list-book-title")
-'    Debug.Print UBound(test, 2)
-
-
-
-
-
-
-
-
-''    ' ã‚·ãƒ¼ãƒˆä¸Šã«æŒ‡å®šã‚¯ãƒ©ã‚¹ã®å…¨å–å¾—ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤º
-    Dim Str As Variant
+    ' ƒV[ƒgã‚Éw’èƒNƒ‰ƒX‚Ì‘Sæ“¾ƒeƒLƒXƒg‚ğ•\¦
+    Dim Str As Object
     Dim i As Integer
     i = 1
     For Each Str In htmlDoc.getElementsByClassName("list-book-title")
-'        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 1).Value = i
-        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 2).Value = Str.innerHTML
+        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 2).Value = Str.innerHTML
         i = i + 1
-'        Debug.Print "å‡ºåŠ›ï¼š" & Str.innerHTML
     Next Str
 
-
-    'æ›¸ç±è©³ç´°
+    '‘ĞÚ×
     i = 1
     For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
-        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 3).Value = Str.innerHTML
+        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 3).Value = Str.innerHTML
         i = i + 1
     Next Str
-
-
-'    i = 1
-'    Dim Arr As Variant
-'    ReDim Arr(20)
-'    Arr = htmlDoc.getElementsByClassName("list-book-detail")
-'    Range("A2").Value = Arr
 
 
     'URL
     i = 1
-'    htmlDoc.getElementsByClassName("book-table__list--detail")(0).getElementsByTagName("a")(0)
-'    For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
     Dim GetUrl As String
     Dim GetUrlData() As String
     Dim GetUrlElement As Integer
     Dim GetID As Integer
     
     For Each Str In htmlDoc.getElementsByClassName("book-table__list--detail")
-        GetUrl = Str.getElementsByTagName("a")  'URLå–å¾—
-        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 4).Value = GetUrl  'å–å¾—URLåæ˜ 
-        GetUrlData = Split(GetUrl, "/")  'URLè¦ç´ å–å¾—
-        GetUrlElement = UBound(GetUrlData)  'URLè¦ç´ ç¢ºèª
-        GetID = GetUrlData(GetUrlElement)  'URLã‹ã‚‰ç•ªå·å–å¾—
-        Worksheets("ã‚¹ã‚¯ãƒ¬ã‚¤ãƒ”ãƒ³ã‚°").Cells(i + 1, 1).Value = GetID  'ãƒ¯ãƒ¼ã‚¯ã‚·ãƒ¼ãƒˆã¸åæ˜ 
-        i = i + 1  'æ¬¡ã®è¡ŒæŒ‡å®š
+        GetUrl = Str.getElementsByTagName("a")  'URLæ“¾
+        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 4).Value = GetUrl  'æ“¾URL”½‰f
+        GetUrlData = Split(GetUrl, "/")  'URL—v‘fæ“¾
+        GetUrlElement = UBound(GetUrlData)  'URL—v‘fŠm”F
+        GetID = GetUrlData(GetUrlElement)  'URL‚©‚ç”Ô†æ“¾
+        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 1).Value = GetID  'ƒ[ƒNƒV[ƒg‚Ö”½‰f
+        i = i + 1  'Ÿ‚Ìsw’è
     Next Str
 
 
-'    Dim test As String
-''    test = "aa/bb/cc/dd"
-'    test = "https://protected-fortress-61913.herokuapp.com/book"
-'    test2 = Split(test, "/")
-'    Debug.Print test
-'    Debug.Print test2(0)
-'    Debug.Print test2(1)
-'    Debug.Print test2(2)
-'    Debug.Print test2(3)
-'    Debug.Print UBound(test2)
+
+    '‰æ‘œURLæ“¾
+    
+    '‰æ‘œ—p•Ï”
+    Dim imgURL As String '‰æ‘œURL
+    Dim Img As Object '‰æ‘œƒIƒuƒWƒFƒNƒg
+    Dim toppix As Long 'ˆÊ’uƒsƒNƒZƒ‹
+
+'    '1ŒÂ‚ğƒTƒ“ƒvƒ‹æ“¾
+'    imgURL = htmlDoc.images(0).src
+'    Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(2, 5).Value = imgURL
+'    Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+'        fileName:=imgURL, _
+'            LinkToFile:=True, _
+'                SaveWithDocument:=True, _
+'                Left:=0, _
+'                Top:=0, _
+'                Width:=100, _
+'                Height:=80
+    
+'    'URL‚Ì‚İæ“¾
+'    i = 1
+'    For Each IMG In htmlDoc.images 'ƒCƒ[ƒWæ“¾
+'        imgURL = IMG.src '•Ï”Ši”[
+'        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 5).Value = imgURL 'æ“¾URL”½‰f
+'        i = i + 1
+'    Next IMG
+    
+    
+    
+    Dim ActCell As Object
+
+    i = 1
+    toppix = 0
+    For Each Img In htmlDoc.images 'ƒCƒ[ƒWæ“¾
+        imgURL = Img.src '•Ï”Ši”[
+        Set ActCell = Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Cells(i + 1, 5)
+        ActCell.Value = imgURL  'æ“¾URL”½‰f
+
+        '‰æ‘œ‚ğ•\¦
+        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+            fileName:=imgURL, _
+                LinkToFile:=True, _
+                    SaveWithDocument:=True, _
+                    Left:=0, _
+                    Top:=0 + toppix, _
+                    Width:=100, _
+                    Height:=100
+
+'        '‰æ‘œ‚ğ•\¦AƒZƒ‹ƒsƒNƒZƒ‹æ“¾
+'        Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+'            fileName:=imgURL, _
+'                LinkToFile:=True, _
+'                    SaveWithDocument:=True, _
+'                    Left:=ActCell.Left, _
+'                    Top:=ActCell.Top, _
+'                    Width:=100, _
+'                    Height:=100
+
+        i = i + 1
+        toppix = toppix + 100
+    Next Img
 
 
-'book-table__list--detail
-
-
-
-
-    objIE.Quit 'objIEã‚’çµ‚äº†ã•ã›ã‚‹
-    Debug.Print "ãƒ‡ãƒ¼ã‚¿å–å¾—ãŒå®Œäº†ã—ã¾ã—ãŸã€‚"
+    objIE.Quit 'objIE‚ğI—¹‚³‚¹‚é
+    MsgBox "ƒf[ƒ^æ“¾‚ªŠ®—¹‚µ‚Ü‚µ‚½B"
 End Sub
 Sub WaitResponse(objIE As Object)
-    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE 'èª­ã¿è¾¼ã¿å¾…ã¡
+    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '“Ç‚İ‚İ‘Ò‚¿
         DoEvents
     Loop
+End Sub
+Sub picture1()
+    'ƒ[ƒJƒ‹ƒfƒBƒXƒNã‚Ì‰æ‘œƒtƒ@ƒCƒ‹‚ğ•\¦
+    Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+        fileName:="Z:\FierVega\ariawase-master\bin\test.jpg", _
+            LinkToFile:=True, _
+                SaveWithDocument:=True, _
+                Left:=0, _
+                Top:=0, _
+                Width:=100, _
+                Height:=80
+End Sub
+Sub picture2()
+    'coverURL‚ğw’è‚µ‚Äƒtƒ@ƒCƒ‹•\¦
+    Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+        fileName:="https://cover.openbd.jp/9784797398892.jpg", _
+            LinkToFile:=True, _
+                SaveWithDocument:=True, _
+                Left:=0, _
+                Top:=0, _
+                Width:=100, _
+                Height:=80
+End Sub
+Sub picture3()
+    'coverURL‚ğw’è‚µ‚Äƒtƒ@ƒCƒ‹•\¦
+    Worksheets("ƒXƒNƒŒƒCƒsƒ“ƒO").Shapes.AddPicture _
+        fileName:="https://cover.openbd.jp/9784797398892.jpg", _
+            LinkToFile:=True, _
+                SaveWithDocument:=True, _
+                Left:=330, _
+                Top:=40, _
+                Width:=100, _
+                Height:=80
 End Sub
