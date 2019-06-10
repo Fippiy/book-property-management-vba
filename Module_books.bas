@@ -13,61 +13,60 @@ Sub getBookdata()
     Dim htmlDoc As HTMLDocument 'HTMLドキュメントオブジェクトを準備
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
-    Dim Str As Object
+    Dim Bookdata As Object 'レコード単位データ
+    Dim detailField As Variant '詳細フィールドデータ
+    Dim GetUrl As String '詳細ページURL
+    Dim GetUrlData() As String '詳細ページURL,Splitデータ
+    Dim GetUrlElement As Integer 'URLSplit要素数
+    Dim GetID As Integer 'ID番号
+    
+    Dim imgURL As String '画像URL
+'    Dim imgURL As Variant '画像URL
+    Dim Img As Variant '画像オブジェクト
+    Dim ActCell As Object '画像出力セル
+    
     Dim i As Integer
     i = 1
     
     'レコード単位出力(テストシート)
     i = 1
-    For Each Str In htmlDoc.getElementsByClassName("book-table__list")
-        Worksheets("テスト").Cells(i + 1, 2).Value = Str.innerHTML
-        i = i + 1
-    Next Str
+    ' book-table__listの要素をBookdataとして処理
+    For Each Bookdata In htmlDoc.getElementsByClassName("book-table__list")
     
-    ' シート上に指定クラスの全取得テキストを表示
-    i = 1
-    For Each Str In htmlDoc.getElementsByClassName("list-book-title")
-        Worksheets("スクレイピング").Cells(i + 1, 2).Value = Str.innerHTML
-        i = i + 1
-    Next Str
+        'Bookdata要素全体HTML
+        Worksheets("テスト").Cells(i + 1, 2).Value = Bookdata.innerHTML
+            
+        '--detail部を取得してそれぞれ反映
+            
+            detailField = Bookdata.getElementsByClassName("book-table__list--detail") '--detailを取得
+            
+            'タイトル名
+            Worksheets("テスト").Cells(i + 1, 3).Value = detailField.getElementsByClassName("list-book-title")(0).innerText
+            
+            '詳細テキスト
+            Worksheets("テスト").Cells(i + 1, 4).Value = detailField.getElementsByClassName("list-book-detail")(0).innerText
+            
+            
+            '詳細ページURL
+            GetUrl = detailField.getElementsByTagName("a") 'URL取得
+            Worksheets("テスト").Cells(i + 1, 5).Value = GetUrl  '取得URL反映
+            GetUrlData = Split(GetUrl, "/")  'URL要素取得
+            GetUrlElement = UBound(GetUrlData)  'URL要素確認
+            GetID = GetUrlData(GetUrlElement)  'URLから番号取得
+            Worksheets("テスト").Cells(i + 1, 1).Value = GetID
+        
+        '--detail部を取得してそれぞれ反映ここまで
+        
+                
+        '画像処理
 
-    '書籍詳細
-    i = 1
-    For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
-        Worksheets("スクレイピング").Cells(i + 1, 3).Value = Str.innerHTML
-        i = i + 1
-    Next Str
-
-
-    'URL
-    Dim GetUrl As String
-    Dim GetUrlData() As String
-    Dim GetUrlElement As Integer
-    Dim GetID As Integer
-
-    i = 1
-    For Each Str In htmlDoc.getElementsByClassName("book-table__list--detail")
-        GetUrl = Str.getElementsByTagName("a")  'URL取得
-        Worksheets("スクレイピング").Cells(i + 1, 4).Value = GetUrl  '取得URL反映
-        GetUrlData = Split(GetUrl, "/")  'URL要素取得
-        GetUrlElement = UBound(GetUrlData)  'URL要素確認
-        GetID = GetUrlData(GetUrlElement)  'URLから番号取得
-        Worksheets("スクレイピング").Cells(i + 1, 1).Value = GetID  'ワークシートへ反映
-        i = i + 1  '次の行指定
-    Next Str
-
-    '画像用変数
-    Dim imgURL As String '画像URL
-    Dim Img As Object '画像オブジェクト
-    Dim ActCell As Object '画像出力セル
-
-    i = 1
-    For Each Img In htmlDoc.images '画像要素取得
+'        Img = Bookdata.images '画像取得
+        Img = Bookdata.getElementsByTagName("img")  '画像取得
         imgURL = Img.src '画像URL
-        Set ActCell = Worksheets("スクレイピング").Cells(i + 1, 5)
+        Set ActCell = Worksheets("テスト").Cells(i + 1, 6)
 
         '画像出力セルのピクセルを指定して表示
-        Worksheets("スクレイピング").Shapes.AddPicture _
+        Worksheets("テスト").Shapes.AddPicture _
             fileName:=imgURL, _
                 LinkToFile:=True, _
                     SaveWithDocument:=True, _
@@ -76,8 +75,67 @@ Sub getBookdata()
                     Width:=100, _
                     Height:=100
 
+        '画像処理ここまで
+        
+        
+        '次のレコードの行番号
         i = i + 1
-    Next Img
+    Next Bookdata
+    
+'    ' シート上に指定クラスの全取得テキストを表示
+'    i = 1
+'    For Each Str In htmlDoc.getElementsByClassName("list-book-title")
+'        Worksheets("スクレイピング").Cells(i + 1, 2).Value = Str.innerHTML
+'        i = i + 1
+'    Next Str
+'
+'    '書籍詳細
+'    i = 1
+'    For Each Str In htmlDoc.getElementsByClassName("list-book-detail")
+'        Worksheets("スクレイピング").Cells(i + 1, 3).Value = Str.innerHTML
+'        i = i + 1
+'    Next Str
+'
+'
+'    'URL
+'    Dim GetUrl As String
+'    Dim GetUrlData() As String
+'    Dim GetUrlElement As Integer
+'    Dim GetID As Integer
+'
+'    i = 1
+'    For Each Str In htmlDoc.getElementsByClassName("book-table__list--detail")
+'        GetUrl = Str.getElementsByTagName("a")  'URL取得
+'        Worksheets("スクレイピング").Cells(i + 1, 4).Value = GetUrl  '取得URL反映
+'        GetUrlData = Split(GetUrl, "/")  'URL要素取得
+'        GetUrlElement = UBound(GetUrlData)  'URL要素確認
+'        GetID = GetUrlData(GetUrlElement)  'URLから番号取得
+'        Worksheets("スクレイピング").Cells(i + 1, 1).Value = GetID  'ワークシートへ反映
+'        i = i + 1  '次の行指定
+'    Next Str
+'
+'    '画像用変数
+'    Dim imgURL As String '画像URL
+'    Dim Img As Object '画像オブジェクト
+'    Dim ActCell As Object '画像出力セル
+'
+'    i = 1
+'    For Each Img In htmlDoc.images '画像要素取得
+'        imgURL = Img.src '画像URL
+'        Set ActCell = Worksheets("スクレイピング").Cells(i + 1, 5)
+'
+'        '画像出力セルのピクセルを指定して表示
+'        Worksheets("スクレイピング").Shapes.AddPicture _
+'            fileName:=imgURL, _
+'                LinkToFile:=True, _
+'                    SaveWithDocument:=True, _
+'                    Left:=ActCell.Left, _
+'                    Top:=ActCell.Top, _
+'                    Width:=100, _
+'                    Height:=100
+'
+'        i = i + 1
+'    Next Img
 
 
     objIE.Quit 'objIEを終了させる
