@@ -13,6 +13,11 @@ Sub getBookdata()
     Dim htmlDoc As HTMLDocument 'HTMLドキュメントオブジェクトを準備
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
+    '作業ワークシート指定
+    Dim SWSheet As Worksheet 'ScrapingWorksheet
+    Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
+    
+    
     Dim Bookdata As Object 'レコード単位データ
     Dim detailField As Variant '詳細フィールドデータ
     Dim GetUrl As String '詳細ページURL
@@ -28,32 +33,32 @@ Sub getBookdata()
     Dim i As Integer
     i = 1
     
-    'レコード単位出力(テストシート)
-    i = 1
+    
+    'レコード単位でデータ出力
     ' book-table__listの要素をBookdataとして処理
     For Each Bookdata In htmlDoc.getElementsByClassName("book-table__list")
     
-        'Bookdata要素全体HTML
-        Worksheets("テスト").Cells(i + 1, 2).Value = Bookdata.innerHTML
+'        'Bookdata要素全体HTML(出力確認用)
+'        SWSheet.Cells(i + 1, 2).Value = Bookdata.innerHTML
             
         '--detail部を取得してそれぞれ反映
             
             detailField = Bookdata.getElementsByClassName("book-table__list--detail") '--detailを取得
             
             'タイトル名
-            Worksheets("テスト").Cells(i + 1, 3).Value = detailField.getElementsByClassName("list-book-title")(0).innerText
+            SWSheet.Cells(i + 1, 2).Value = detailField.getElementsByClassName("list-book-title")(0).innerText
             
             '詳細テキスト
-            Worksheets("テスト").Cells(i + 1, 4).Value = detailField.getElementsByClassName("list-book-detail")(0).innerText
+            SWSheet.Cells(i + 1, 3).Value = detailField.getElementsByClassName("list-book-detail")(0).innerText
             
             
             '詳細ページURL
             GetUrl = detailField.getElementsByTagName("a") 'URL取得
-            Worksheets("テスト").Cells(i + 1, 5).Value = GetUrl  '取得URL反映
+            SWSheet.Cells(i + 1, 4).Value = GetUrl  '取得URL反映
             GetUrlData = Split(GetUrl, "/")  'URL要素取得
             GetUrlElement = UBound(GetUrlData)  'URL要素確認
             GetID = GetUrlData(GetUrlElement)  'URLから番号取得
-            Worksheets("テスト").Cells(i + 1, 1).Value = GetID
+            SWSheet.Cells(i + 1, 1).Value = GetID
         
         '--detail部を取得してそれぞれ反映ここまで
         
@@ -63,10 +68,10 @@ Sub getBookdata()
 '        Img = Bookdata.images '画像取得
         Img = Bookdata.getElementsByTagName("img")  '画像取得
         imgURL = Img.src '画像URL
-        Set ActCell = Worksheets("テスト").Cells(i + 1, 6)
+        Set ActCell = SWSheet.Cells(i + 1, 5)
 
         '画像出力セルのピクセルを指定して表示
-        Worksheets("テスト").Shapes.AddPicture _
+        SWSheet.Shapes.AddPicture _
             fileName:=imgURL, _
                 LinkToFile:=True, _
                     SaveWithDocument:=True, _
@@ -80,6 +85,7 @@ Sub getBookdata()
         
         '次のレコードの行番号
         i = i + 1
+'        If i > 1 Then Exit For
     Next Bookdata
     
 '    ' シート上に指定クラスの全取得テキストを表示
