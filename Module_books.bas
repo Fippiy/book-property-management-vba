@@ -13,9 +13,18 @@ Sub getBookdata()
     Dim htmlDoc As HTMLDocument 'HTMLドキュメントオブジェクトを準備
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
-    ' シート上に指定クラスの全取得テキストを表示
     Dim Str As Object
     Dim i As Integer
+    i = 1
+    
+    'レコード単位出力(テストシート)
+    i = 1
+    For Each Str In htmlDoc.getElementsByClassName("book-table__list")
+        Worksheets("テスト").Cells(i + 1, 2).Value = Str.innerHTML
+        i = i + 1
+    Next Str
+    
+    ' シート上に指定クラスの全取得テキストを表示
     i = 1
     For Each Str In htmlDoc.getElementsByClassName("list-book-title")
         Worksheets("スクレイピング").Cells(i + 1, 2).Value = Str.innerHTML
@@ -31,12 +40,12 @@ Sub getBookdata()
 
 
     'URL
-    i = 1
     Dim GetUrl As String
     Dim GetUrlData() As String
     Dim GetUrlElement As Integer
     Dim GetID As Integer
-    
+
+    i = 1
     For Each Str In htmlDoc.getElementsByClassName("book-table__list--detail")
         GetUrl = Str.getElementsByTagName("a")  'URL取得
         Worksheets("スクレイピング").Cells(i + 1, 4).Value = GetUrl  '取得URL反映
@@ -53,7 +62,6 @@ Sub getBookdata()
     Dim ActCell As Object '画像出力セル
 
     i = 1
-    
     For Each Img In htmlDoc.images '画像要素取得
         imgURL = Img.src '画像URL
         Set ActCell = Worksheets("スクレイピング").Cells(i + 1, 5)
