@@ -7,14 +7,14 @@ Sub getBookdatas()
         'IE
         Dim objIE As InternetExplorer 'IEオブジェクトを準備
         Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-        objIE.Visible = True 'IEを表示
+        objIE.Visible = False 'IEを表示
         'HTML
         Dim htmlDoc As HTMLDocument 'HTML全体
         Dim Pagination As HTMLUListElement 'HTMLページネーション
         Dim PagiLink As HTMLAnchorElement '次ページリンク
         '作業ワークシート
         Dim SWSheet As Worksheet 'ScrapingWorksheet
-        Set SWSheet = ThisWorkbook.Worksheets("テスト")
+        Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
         'データ取得URL
         Dim OpenPage As String
         OpenPage = "https://protected-fortress-61913.herokuapp.com/book"
@@ -61,12 +61,60 @@ Sub getBookList(SWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
     Dim Bookdata As HTMLDivElement 'レコード単位データ
     Dim detailField As HTMLDivElement '詳細フィールドデータ
     
-    For Each Bookdata In htmlDoc.getElementsByClassName("book-table__list")
-        SWSheet.Cells(i + 1, 1).Value = i
-        
-        Set detailField = Bookdata.getElementsByClassName("book-table__list--detail")(0) '--detailを取得
+    Dim BookdataURL As String '詳細ページURL
+    Dim BookdataURLSplit() As String '詳細ページURL要素
+    Dim BookdataURLBound As Long 'URL要素数
+    Dim BookdataID As Integer 'ID番号
+    Dim BookdataImg As HTMLImg 'IMGタグ情報
+    Dim ImgURL As String '画像URL
+    Dim ActCell As Range '画像出力セル
 
-        SWSheet.Cells(i + 1, 2).Value = detailField.getElementsByClassName("list-book-title")(0).innerText
+
+    For Each Bookdata In htmlDoc.getElementsByClassName("book-table__list")
+        
+        '--detail情報からデータ取得
+        
+            '--detailを取得
+            Set detailField = Bookdata.getElementsByClassName("book-table__list--detail")(0)
+    
+            'タイトル名取得
+            SWSheet.Cells(i + 1, 2).Value = detailField.getElementsByClassName("list-book-title")(0).innerText
+            
+            '詳細テキスト
+            SWSheet.Cells(i + 1, 3).Value = detailField.getElementsByClassName("list-book-detail")(0).innerText
+            
+            '詳細ページURL
+            BookdataURL = detailField.getElementsByTagName("a")(0) 'URL取得
+            SWSheet.Cells(i + 1, 4).Value = BookdataURL  '取得URL反映
+            
+            'Bookdata_ID取得
+            BookdataURLSplit = Split(BookdataURL, "/")  'URL要素分割
+            BookdataURLBound = UBound(BookdataURLSplit)  'URL要素数確認
+            BookdataID = BookdataURLSplit(BookdataURLBound)  'ID番号取得
+            SWSheet.Cells(i + 1, 1).Value = BookdataID
+        
+        '--detail情報からデータ取得ここまで
+        
+        
+        '画像処理
+
+            Set BookdataImg = Bookdata.getElementsByTagName("img")(0)  '画像取得
+            ImgURL = BookdataImg.src '画像URL
+            Set ActCell = SWSheet.Cells(i + 1, 5) '出力セル
+    
+            '画像出力セルのピクセルを指定して表示
+            SWSheet.Shapes.AddPicture _
+                fileName:=ImgURL, _
+                    LinkToFile:=True, _
+                        SaveWithDocument:=True, _
+                        Left:=ActCell.Left, _
+                        Top:=ActCell.Top, _
+                        Width:=100, _
+                        Height:=100
+
+        '画像処理ここまで
+        
+        '列番号処理
         i = i + 1
     Next Bookdata
 

@@ -24,7 +24,7 @@ Sub getBookdata()
     Dim GetUrlElement As Integer 'URLSplit要素数
     Dim GetID As Integer 'ID番号
     
-    Dim imgURL As String '画像URL
+    Dim ImgURL As String '画像URL
     Dim Img As Variant '画像オブジェクト
     Dim ActCell As Object '画像出力セル
     
@@ -61,12 +61,12 @@ Sub getBookdata()
         '画像処理
 
         Img = Bookdata.getElementsByTagName("img")  '画像取得
-        imgURL = Img.src '画像URL
+        ImgURL = Img.src '画像URL
         Set ActCell = SWSheet.Cells(i + 1, 5)
 
         '画像出力セルのピクセルを指定して表示
         SWSheet.Shapes.AddPicture _
-            fileName:=imgURL, _
+            fileName:=ImgURL, _
                 LinkToFile:=True, _
                     SaveWithDocument:=True, _
                     Left:=ActCell.Left, _
