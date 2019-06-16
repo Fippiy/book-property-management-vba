@@ -96,23 +96,23 @@ Sub getBookList(SWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
         '--detail情報からデータ取得ここまで
         
         
-'        '画像処理
-'
-'            Set BookdataImg = Bookdata.getElementsByTagName("img")(0)  '画像取得
-'            ImgURL = BookdataImg.src '画像URL
-'            Set ActCell = SWSheet.Cells(i + 1, 5) '出力セル
-'
-'            '画像出力セルのピクセルを指定して表示
-'            SWSheet.Shapes.AddPicture _
-'                fileName:=ImgURL, _
-'                    LinkToFile:=True, _
-'                        SaveWithDocument:=True, _
-'                        Left:=ActCell.Left, _
-'                        Top:=ActCell.Top, _
-'                        Width:=100, _
-'                        Height:=100
-'
-'        '画像処理ここまで
+        '画像処理
+
+            Set BookdataImg = Bookdata.getElementsByTagName("img")(0)  '画像取得
+            ImgURL = BookdataImg.src '画像URL
+            Set ActCell = SWSheet.Cells(i + 1, 5) '出力セル
+
+            '画像出力セルのピクセルを指定して表示
+            SWSheet.Shapes.AddPicture _
+                fileName:=ImgURL, _
+                    LinkToFile:=True, _
+                        SaveWithDocument:=True, _
+                        Left:=ActCell.Left, _
+                        Top:=ActCell.Top, _
+                        Width:=100, _
+                        Height:=100
+
+        '画像処理ここまで
         
         '列番号処理
         i = i + 1
