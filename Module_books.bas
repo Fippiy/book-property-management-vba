@@ -19,7 +19,7 @@ Sub getBookdata()
     
     Dim Bookdata As Object 'レコード単位データ
     Dim detailField As Variant '詳細フィールドデータ
-    Dim GetUrl As String '詳細ページURL
+    Dim geturl As String '詳細ページURL
     Dim GetUrlData() As String '詳細ページURL,Splitデータ
     Dim GetUrlElement As Integer 'URLSplit要素数
     Dim GetID As Integer 'ID番号
@@ -48,9 +48,9 @@ Sub getBookdata()
             
             
             '詳細ページURL
-            GetUrl = detailField.getElementsByTagName("a") 'URL取得
-            SWSheet.Cells(i + 1, 4).Value = GetUrl  '取得URL反映
-            GetUrlData = Split(GetUrl, "/")  'URL要素取得
+            geturl = detailField.getElementsByTagName("a") 'URL取得
+            SWSheet.Cells(i + 1, 4).Value = geturl  '取得URL反映
+            GetUrlData = Split(geturl, "/")  'URL要素取得
             GetUrlElement = UBound(GetUrlData)  'URL要素確認
             GetID = GetUrlData(GetUrlElement)  'URLから番号取得
             SWSheet.Cells(i + 1, 1).Value = GetID
