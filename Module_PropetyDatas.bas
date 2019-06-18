@@ -20,7 +20,7 @@ Sub getBookdatasDatail()
         'データ取得URL
         Dim OpenPage As String
         OpenPage = "https://protected-fortress-61913.herokuapp.com/book"
-        '繰り返し処理
+        'URL取得繰り返し処理
         Dim i As Integer
         i = 1
     
@@ -32,7 +32,7 @@ Sub getBookdatasDatail()
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         OpenPage = "" 'データ取得URL初期化
         
-        
+
         '詳細ページURL取得
         Call getBookList(DWSheet, htmlDoc, i)
         
@@ -93,33 +93,41 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     
     'データ取得URL
     Dim OpenPage As String
-    Dim htmlDoc As HTMLDocument 'HTML全体    Dim DocLavel As HTMLDivElement 'ラベル情報
-    Dim DocColumn As HTMLDivElementt 'column情報
+    Dim htmlDoc As HTMLDocument 'HTML全体
     Dim DocContent As HTMLDivElement 'HTMLコンテンツ処理
-    Dim i As Long
-
-    i = 1
+    Dim DocColumn As HTMLDivElement 'column情報
+    Dim i As Long, j As Long '書き出し用行列処理
+    i = 2
+        
+    Dim URLi As Long '詳細URL読み込み行番号処理
+    URLi = 1
+    
+    '初期文字列挿入
+    OpenPage = True
+    
     '詳細ページを開いて中のデータを取得
-        'テスト用に最初のURLだけ実施
-        OpenPage = DWSheet.Cells(1, 1).Value
+    Do Until OpenPage = ""
+        'URL取得
+        OpenPage = DWSheet.Cells(URLi, 1).Value
         
         objIE.navigate OpenPage 'IEでURLを開く
         Call WaitResponse(objIE) '読み込み待ち
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+        j = 1
         
         '詳細ページHTMLからデータ取得
         'document-contentを取得
         For Each DocContent In htmlDoc.getElementsByClassName("document-content")
-            SWSheet.Cells(i, 1).Value = DocContent.innerHTML
-            Set DocLavel = DocContent.getElementsByClassName("document-content__label")(0)
             Set DocColumn = DocContent.getElementsByClassName("document-content__column")(0)
-            If i <> 9 Then SWSheet.Cells(i, 2).Value = DocLavel.innerHTML
-            SWSheet.Cells(i, 3).Value = DocColumn.innerHTML
-            i = i + 1
+            SWSheet.Cells(i, j).Value = DocColumn.innerHTML
+            j = j + 1
         Next DocContent
         
     '詳細ページURL全取得で終了
-
+    i = i + 1
+    URLi = URLi + 1
+    Loop
+    
 End Sub
 Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
     Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
