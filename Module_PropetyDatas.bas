@@ -14,7 +14,7 @@ Sub getBookdatasDatail()
         Dim PagiLink As HTMLAnchorElement '次ページリンク
         '作業ワークシート
         Dim SWSheet As Worksheet 'ScrapingWorksheet
-        Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
+        Set SWSheet = ThisWorkbook.Worksheets("Sheet1")
         Dim DWSheet As Worksheet 'DetailWorksheet
         Set DWSheet = ThisWorkbook.Worksheets("詳細ページ情報")
         'データ取得URL
@@ -32,7 +32,7 @@ Sub getBookdatasDatail()
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         OpenPage = "" 'データ取得URL初期化
         
-
+        
         '詳細ページURL取得
         Call getBookList(DWSheet, htmlDoc, i)
         
@@ -54,7 +54,7 @@ Sub getBookdatasDatail()
 
 
     '取得した詳細ページURLから詳細ページ情報を取得する
-    Call getDetailBookdata(SWSheet, DWSheet)
+    Call getDetailBookdata(SWSheet, DWSheet, objIE)
 
 
     'VBA終了処理
@@ -87,9 +87,38 @@ Sub getBookList(DWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
     Next Bookdata
 
 End Sub
-Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet)
+Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As InternetExplorer)
 
     '詳細ページURLから詳細内容を取得
+    
+    'データ取得URL
+    Dim OpenPage As String
+    Dim htmlDoc As HTMLDocument 'HTML全体    Dim DocLavel As HTMLDivElement 'ラベル情報
+    Dim DocColumn As HTMLDivElementt 'column情報
+    Dim DocContent As HTMLDivElement 'HTMLコンテンツ処理
+    Dim i As Long
+
+    i = 1
+    '詳細ページを開いて中のデータを取得
+        'テスト用に最初のURLだけ実施
+        OpenPage = DWSheet.Cells(1, 1).Value
+        
+        objIE.navigate OpenPage 'IEでURLを開く
+        Call WaitResponse(objIE) '読み込み待ち
+        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+        
+        '詳細ページHTMLからデータ取得
+        'document-contentを取得
+        For Each DocContent In htmlDoc.getElementsByClassName("document-content")
+            SWSheet.Cells(i, 1).Value = DocContent.innerHTML
+            Set DocLavel = DocContent.getElementsByClassName("document-content__label")(0)
+            Set DocColumn = DocContent.getElementsByClassName("document-content__column")(0)
+            If i <> 9 Then SWSheet.Cells(i, 2).Value = DocLavel.innerHTML
+            SWSheet.Cells(i, 3).Value = DocColumn.innerHTML
+            i = i + 1
+        Next DocContent
+        
+    '詳細ページURL全取得で終了
 
 End Sub
 Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
@@ -97,6 +126,3 @@ Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
         DoEvents
     Loop
 End Sub
-
-
-
