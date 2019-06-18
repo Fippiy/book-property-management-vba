@@ -14,7 +14,7 @@ Sub getBookdatasDatail()
         Dim PagiLink As HTMLAnchorElement '次ページリンク
         '作業ワークシート
         Dim SWSheet As Worksheet 'ScrapingWorksheet
-        Set SWSheet = ThisWorkbook.Worksheets("Sheet1")
+        Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
         Dim DWSheet As Worksheet 'DetailWorksheet
         Set DWSheet = ThisWorkbook.Worksheets("詳細ページ情報")
         'データ取得URL
@@ -34,7 +34,7 @@ Sub getBookdatasDatail()
         
 
         '詳細ページURL取得
-        Call getBookList(DWSheet, htmlDoc, i)
+'        Call getBookList(DWSheet, htmlDoc, i)
         
         
         'ページネーション処理
@@ -87,6 +87,7 @@ Sub getBookList(DWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
     Next Bookdata
 
 End Sub
+
 Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As InternetExplorer)
 
     '詳細ページURLから詳細内容を取得
@@ -98,23 +99,42 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     Dim DocColumn As HTMLDivElement 'column情報
     Dim i As Long, j As Long '書き出し用行列処理
     i = 2
-        
+    
     Dim URLi As Long '詳細URL読み込み行番号処理
     URLi = 1
     
-    '初期文字列挿入
-    OpenPage = True
+    '最初のページ
+    OpenPage = DWSheet.Cells(URLi, 1).Value
+    
+    '画像処理
+    Dim DocPicture As Variant
+    Dim ImgURL As Variant
+    Dim actcell As Variant
     
     '詳細ページを開いて中のデータを取得
     Do Until OpenPage = ""
-        'URL取得
-        OpenPage = DWSheet.Cells(URLi, 1).Value
         
         objIE.navigate OpenPage 'IEでURLを開く
         Call WaitResponse(objIE) '読み込み待ち
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-        j = 1
+        j = 2
         
+        '画像取得処理
+        Set DocPicture = htmlDoc.getElementsByClassName("book-detail__picture")(0)
+        Set ImgURL = DocPicture.getElementsByTagName("img")(0)
+        SWSheet.Cells(i, j).Value = ImgURL.src
+        Set actcell = SWSheet.Cells(i, j)
+        
+        SWSheet.Shapes.AddPicture _
+          fileName:=ImgURL.src, _
+            LinkToFile:=True, _
+            SaveWithDocument:=True, _
+            Left:=actcell.Left, _
+            Top:=actcell.Top, _
+            Width:=100, _
+            Height:=100
+        j = j + 1
+                
         '詳細ページHTMLからデータ取得
         'document-contentを取得
         For Each DocContent In htmlDoc.getElementsByClassName("document-content")
@@ -123,9 +143,12 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
             j = j + 1
         Next DocContent
         
-    '詳細ページURL全取得で終了
-    i = i + 1
-    URLi = URLi + 1
+        '詳細ページURL全取得で終了
+        i = i + 1
+        URLi = URLi + 1
+        
+        '次ページURL取得
+        OpenPage = DWSheet.Cells(URLi, 1).Value
     Loop
     
 End Sub
@@ -134,3 +157,4 @@ Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
         DoEvents
     Loop
 End Sub
+
