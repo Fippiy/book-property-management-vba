@@ -33,7 +33,7 @@ Sub getBookdatasDatail()
         OpenPage = "" 'データ取得URL初期化
         
         '詳細ページURL取得
-'        Call getBookList(DWSheet, htmlDoc, i)
+        Call getBookList(DWSheet, htmlDoc, i)
         
         
         'ページネーション処理
@@ -51,7 +51,7 @@ Sub getBookdatasDatail()
         
     Loop 'OpenPageループエンド
 
-    
+
     '取得した詳細ページURLから詳細ページ情報を取得する
     Call getDetailBookdata(SWSheet, DWSheet, objIE)
 
@@ -105,9 +105,12 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     OpenPage = DWSheet.Cells(URLi, 1).Value
     
     '画像処理
-    Dim DocPicture As Variant
-    Dim ImgURL As Variant
-    Dim actcell As Variant
+'    Dim DocPicture As Variant
+'    Dim ImgURL As Variant
+'    Dim actcell As Variant
+    Dim DocPicture As HTMLDivElement
+    Dim ImgURL As HTMLImg
+    Dim actcell As Range
     
     'ID取得
     Dim GetUrl As String '詳細ページURL
@@ -166,6 +169,7 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     Loop
     
 End Sub
+
 Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
     Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
         DoEvents
