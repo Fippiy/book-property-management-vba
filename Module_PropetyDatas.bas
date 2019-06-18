@@ -20,7 +20,7 @@ Sub getBookdatasDatail()
         'データ取得URL
         Dim OpenPage As String
         OpenPage = "https://protected-fortress-61913.herokuapp.com/book"
-        'URL取得繰り返し処理
+        '繰り返し処理
         Dim i As Integer
         i = 1
     
@@ -32,7 +32,6 @@ Sub getBookdatasDatail()
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         OpenPage = "" 'データ取得URL初期化
         
-
         '詳細ページURL取得
 '        Call getBookList(DWSheet, htmlDoc, i)
         
@@ -52,10 +51,9 @@ Sub getBookdatasDatail()
         
     Loop 'OpenPageループエンド
 
-
+    
     '取得した詳細ページURLから詳細ページ情報を取得する
     Call getDetailBookdata(SWSheet, DWSheet, objIE)
-
 
     'VBA終了処理
     objIE.Quit 'objIEを終了させる
@@ -111,18 +109,33 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     Dim ImgURL As Variant
     Dim actcell As Variant
     
+    'ID取得
+    Dim GetUrl As String '詳細ページURL
+    Dim GetUrlData() As String '詳細ページURL,Splitデータ
+    Dim GetUrlElement As Integer 'URLSplit要素数
+    Dim GetID As Integer 'ID番号
+    
     '詳細ページを開いて中のデータを取得
     Do Until OpenPage = ""
         
         objIE.navigate OpenPage 'IEでURLを開く
         Call WaitResponse(objIE) '読み込み待ち
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-        j = 2
+        j = 1
         
-        '画像取得処理
+        '1列目にID番号
+        '詳細ページURL
+        GetUrl = OpenPage 'URL取得
+        GetUrlData = Split(GetUrl, "/")  'URL要素取得
+        GetUrlElement = UBound(GetUrlData)  'URL要素確認
+        GetID = GetUrlData(GetUrlElement)  'URLから番号取得
+        SWSheet.Cells(i, j).Value = GetID
+        j = j + 1
+        
+        '2列目に画像
+        'book-detail__pictureを取得
         Set DocPicture = htmlDoc.getElementsByClassName("book-detail__picture")(0)
         Set ImgURL = DocPicture.getElementsByTagName("img")(0)
-        SWSheet.Cells(i, j).Value = ImgURL.src
         Set actcell = SWSheet.Cells(i, j)
         
         SWSheet.Shapes.AddPicture _
@@ -134,7 +147,8 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
             Width:=100, _
             Height:=100
         j = j + 1
-                
+        
+        '3列目以降にテキスト
         '詳細ページHTMLからデータ取得
         'document-contentを取得
         For Each DocContent In htmlDoc.getElementsByClassName("document-content")
@@ -157,4 +171,3 @@ Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
         DoEvents
     Loop
 End Sub
-
