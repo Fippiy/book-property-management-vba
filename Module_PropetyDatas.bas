@@ -27,6 +27,9 @@ Sub getBookdatasDatail()
         'URLコレクション
         Dim URLCol As Collection
         Set URLCol = New Collection
+        
+        '処理完了メッセージ
+        Dim ExitMsg As String
 
     'OpenPageがある間はループして続ける
     Do Until OpenPage = ""
@@ -56,14 +59,23 @@ Sub getBookdatasDatail()
         
     Loop 'OpenPageループエンド
 
-
-    '取得した詳細ページURLから詳細ページ情報を取得する
-    Call getDetailBookdata(SWSheet, objIE, URLCol)
+'    Dim ExitMsg As String '処理完了メッセージ
+    
+    '詳細ページURLがなければ終了する
+    If URLCol.Count > 0 Then
+        Call getDetailBookdata(SWSheet, objIE, URLCol)
+        ExitMsg = "データ取得が完了しました。"
+    Else
+        ExitMsg = "取得データがありません"
+    End If
+'    '取得した詳細ページURLから詳細ページ情報を取得する
+'    Call getDetailBookdata(SWSheet, objIE, URLCol)
 
 
     'VBA終了処理
     objIE.Quit 'objIEを終了させる
-    MsgBox "データ取得が完了しました。"
+'    MsgBox "データ取得が完了しました。"
+    MsgBox ExitMsg
 
 End Sub
 
