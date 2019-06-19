@@ -15,8 +15,8 @@ Sub getBookdatasDatail()
         '作業ワークシート
         Dim SWSheet As Worksheet 'ScrapingWorksheet
         Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
-        Dim DWSheet As Worksheet 'DetailWorksheet
-        Set DWSheet = ThisWorkbook.Worksheets("詳細ページ情報")
+'        Dim DWSheet As Worksheet 'DetailWorksheet
+'        Set DWSheet = ThisWorkbook.Worksheets("詳細ページ情報")
         'データ取得URL
         Dim OpenPage As String
         OpenPage = "https://protected-fortress-61913.herokuapp.com/book"
@@ -24,6 +24,10 @@ Sub getBookdatasDatail()
         Dim i As Integer
         i = 1
     
+        'URLコレクション
+        Dim URLCol As Collection
+        Set URLCol = New Collection
+
     'OpenPageがある間はループして続ける
     Do Until OpenPage = ""
         
@@ -33,7 +37,8 @@ Sub getBookdatasDatail()
         OpenPage = "" 'データ取得URL初期化
         
         '詳細ページURL取得
-        Call getBookList(DWSheet, htmlDoc, i)
+'        Call getBookList(DWSheet, htmlDoc, i, URLCol)
+        Call getBookList(htmlDoc, i, URLCol)
         
         
         'ページネーション処理
@@ -53,7 +58,8 @@ Sub getBookdatasDatail()
 
 
     '取得した詳細ページURLから詳細ページ情報を取得する
-    Call getDetailBookdata(SWSheet, DWSheet, objIE)
+    Call getDetailBookdata(SWSheet, objIE, URLCol)
+
 
     'VBA終了処理
     objIE.Quit 'objIEを終了させる
@@ -61,7 +67,7 @@ Sub getBookdatasDatail()
 
 End Sub
 
-Sub getBookList(DWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
+Sub getBookList(htmlDoc As HTMLDocument, i As Integer, URLCol As Collection)
     
     '詳細ページURLを取得
     Dim Bookdata As HTMLDivElement 'レコード単位データ
@@ -77,7 +83,8 @@ Sub getBookList(DWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
     
             '詳細ページURL
             BookdataURL = detailField.getElementsByTagName("a")(0) 'URL取得
-            DWSheet.Cells(i, 1).Value = BookdataURL  '取得URL反映
+'            DWSheet.Cells(i, 1).Value = BookdataURL  '取得URL反映
+            URLCol.Add BookdataURL
         '--detail情報からデータ取得ここまで
         
         '列番号処理
@@ -86,7 +93,7 @@ Sub getBookList(DWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
 
 End Sub
 
-Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As InternetExplorer)
+Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As Collection)
 
     '詳細ページURLから詳細内容を取得
     
@@ -97,29 +104,38 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
     Dim DocColumn As HTMLDivElement 'column情報
     Dim i As Long, j As Long '書き出し用行列処理
     i = 2
-    
+
     Dim URLi As Long '詳細URL読み込み行番号処理
     URLi = 1
-    
+
     '最初のページ
-    OpenPage = DWSheet.Cells(URLi, 1).Value
+'    OpenPage = DWSheet.Cells(URLi, 1).Value
+    'URL取得総数確認
+    Dim fornumber As Long
+    fornumber = URLCol.Count
+'    OpenPage = URLCol(URLi)
     
     '画像処理
-'    Dim DocPicture As Variant
-'    Dim ImgURL As Variant
-'    Dim actcell As Variant
     Dim DocPicture As HTMLDivElement
     Dim ImgURL As HTMLImg
     Dim actcell As Range
-    
+
     'ID取得
     Dim GetUrl As String '詳細ページURL
     Dim GetUrlData() As String '詳細ページURL,Splitデータ
     Dim GetUrlElement As Integer 'URLSplit要素数
     Dim GetID As Integer 'ID番号
-    
+
+'    '動作確認用
+'    OpenPage = "test"
+
     '詳細ページを開いて中のデータを取得
-    Do Until OpenPage = ""
+'    Do Until OpenPage = ""
+    Do
+        
+        '次ページURL取得
+'        OpenPage = DWSheet.Cells(URLi, 1).Value
+        OpenPage = URLCol(URLi)
         
         objIE.navigate OpenPage 'IEでURLを開く
         Call WaitResponse(objIE) '読み込み待ち
@@ -137,8 +153,13 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
         
         '2列目に画像
         'book-detail__pictureを取得
+'        For Each DocContent In htmlDoc.getElementsByClassName("book-detail__picture")
+'            Set test2 = DocContent.getElementsByTagName("IMG")(0)
+'            SWSheet.Cells(i, j).Value = test2.src
+'        Next DocContent
         Set DocPicture = htmlDoc.getElementsByClassName("book-detail__picture")(0)
         Set ImgURL = DocPicture.getElementsByTagName("img")(0)
+'        SWSheet.Cells(i, j).Value = ImgURL.src
         Set actcell = SWSheet.Cells(i, j)
         
         SWSheet.Shapes.AddPicture _
@@ -151,6 +172,7 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
             Height:=100
         j = j + 1
         
+        
         '3列目以降にテキスト
         '詳細ページHTMLからデータ取得
         'document-contentを取得
@@ -160,16 +182,15 @@ Sub getDetailBookdata(SWSheet As Worksheet, DWSheet As Worksheet, objIE As Inter
             j = j + 1
         Next DocContent
         
+        
         '詳細ページURL全取得で終了
         i = i + 1
         URLi = URLi + 1
         
-        '次ページURL取得
-        OpenPage = DWSheet.Cells(URLi, 1).Value
-    Loop
+    Loop Until URLi > fornumber
+'    Loop
     
 End Sub
-
 Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
     Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
         DoEvents
