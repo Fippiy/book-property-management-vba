@@ -101,7 +101,7 @@ Sub getBookList(SWSheet As Worksheet, htmlDoc As HTMLDocument, i As Integer)
             Set BookdataImg = Bookdata.getElementsByTagName("img")(0)  '画像取得
             ImgURL = BookdataImg.src '画像URL
             Set ActCell = SWSheet.Cells(i + 1, 5) '出力セル
-    
+
             '画像出力セルのピクセルを指定して表示
             SWSheet.Shapes.AddPicture _
                 fileName:=ImgURL, _
