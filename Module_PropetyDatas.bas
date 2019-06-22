@@ -120,7 +120,7 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     '画像処理
     Dim DocPicture As HTMLDivElement
     Dim ImgURL As HTMLImg
-    Dim actcell As Range
+    Dim ActCell As Range
 
     'ID取得
     Dim GetUrl As String '詳細ページURL
@@ -150,14 +150,14 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
         '2列目に画像表示
         Set DocPicture = htmlDoc.getElementsByClassName("book-detail__picture")(0)
         Set ImgURL = DocPicture.getElementsByTagName("img")(0)
-        Set actcell = SWSheet.Cells(i, j)
+        Set ActCell = SWSheet.Cells(i, j)
         
         SWSheet.Shapes.AddPicture _
           fileName:=ImgURL.src, _
             LinkToFile:=True, _
             SaveWithDocument:=True, _
-            Left:=actcell.Left, _
-            Top:=actcell.Top, _
+            Left:=ActCell.Left, _
+            Top:=ActCell.Top, _
             Width:=100, _
             Height:=100
         j = j + 1
