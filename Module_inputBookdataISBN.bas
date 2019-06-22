@@ -31,9 +31,11 @@ Sub inputBookdataISBN()
     Call WaitResponse(objIE) '読み込み待ち
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
 
+    'フォーム入力
+    htmlDoc.getElementsByClassName("form-input__input")(0).Value = "1234567890123"
 
     'VBA終了処理
-    objIE.Quit 'objIEを終了させる
+'    objIE.Quit 'objIEを終了させる
     ExitMsg = "test"
     MsgBox ExitMsg
 
