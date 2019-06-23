@@ -33,7 +33,8 @@ Sub inputBookdataISBN()
 
     'フォーム入力
     htmlDoc.getElementsByClassName("form-input__input")(0).Value = "1234567890123"
-
+    htmlDoc.getElementsByClassName("send isbn")(0).Click
+    
     'VBA終了処理
 '    objIE.Quit 'objIEを終了させる
     ExitMsg = "test"
