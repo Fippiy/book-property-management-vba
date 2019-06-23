@@ -32,7 +32,7 @@ Sub inputBookdataISBN()
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
 
     'フォーム入力
-    htmlDoc.getElementsByClassName("form-input__input")(0).Value = "1234567890123"
+    htmlDoc.getElementsByClassName("form-input__input")(0).Value = "9784295000914"
     htmlDoc.getElementsByClassName("send isbn")(0).Click
     
     'VBA終了処理
