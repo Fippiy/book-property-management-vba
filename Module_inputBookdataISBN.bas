@@ -31,18 +31,20 @@ Sub inputBookdataISBN()
     Call WaitResponse(objIE) '読み込み待ち
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
 
+    Dim InputISBN As String
+    'ISBNコード取得
+    InputISBN = ISSheet.Cells(1, 1).Value
     'フォーム入力
-    htmlDoc.getElementsByClassName("form-input__input")(0).Value = "9784295000914"
+    htmlDoc.getElementsByClassName("form-input__input")(0).Value = InputISBN
     htmlDoc.getElementsByClassName("send isbn")(0).Click
-    
+
+
     'VBA終了処理
 '    objIE.Quit 'objIEを終了させる
-    ExitMsg = "test"
+    ExitMsg = "本を登録しました。"
     MsgBox ExitMsg
 
-
 End Sub
-
 
 Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
     Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
