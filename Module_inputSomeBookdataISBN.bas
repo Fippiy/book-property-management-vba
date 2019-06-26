@@ -7,7 +7,8 @@ Sub inputSomeBookdataISBN()
         'IE
         Dim objIE As InternetExplorer 'IEオブジェクトを準備
         Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-        objIE.Visible = False 'IEを表示
+'        objIE.Visible = False 'IEを表示
+        objIE.Visible = True 'IEを表示
         'HTML
         Dim htmlDoc As HTMLDocument 'HTML全体
         Dim Pagination As HTMLUListElement 'HTMLページネーション
@@ -51,9 +52,18 @@ Sub inputSomeBookdataISBN()
     htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN
     htmlDoc.getElementsByClassName("send isbn")(0).Click
 
+    'フォーム入力後の操作検証
+    'URLを開いてオブジェクト取得
+'    objIE.navigate InputISBNPage 'IEでURLを開く
+    Call WaitResponse(objIE) '読み込み待ち
+    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--isbn")(0).innerText
+    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
+    ISSheet.Cells(2, 3).Value = htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
+
     'VBA終了処理
-    objIE.Quit 'objIEを終了させる
-    ExitMsg = "本を登録しました。"
+'    objIE.Quit 'objIEを終了させる
+    ExitMsg = "登録処理が完了しました。"
     MsgBox ExitMsg
 
 End Sub
