@@ -7,8 +7,7 @@ Sub inputSomeBookdataISBN()
         'IE
         Dim objIE As InternetExplorer 'IEオブジェクトを準備
         Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-'        objIE.Visible = False 'IEを表示
-        objIE.Visible = True 'IEを表示
+        objIE.Visible = False 'IEを表示
         'HTML
         Dim htmlDoc As HTMLDocument 'HTML全体
         Dim Pagination As HTMLUListElement 'HTMLページネーション
@@ -56,24 +55,38 @@ Sub inputSomeBookdataISBN()
     Call WaitResponse(objIE) '読み込み待ち
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
-'    'データ検証用
-'    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--isbn")(0).innerText
-'    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
-'    ISSheet.Cells(2, 3).Value = htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
-
-    '結果取得
-    Dim ResultISBN As HTMLDivElement
-    i = 2
-    For Each ResultISBN In htmlDoc.getElementsByClassName("isbn-result__box--msg")
-        ISSheet.Cells(i, 3).Value = ResultISBN.innerText
-        i = i + 1
-    Next ResultISBN
-
+    'フォーム処理結果取得
+    Call getISBNAnswers(htmlDoc, ISSheet)
 
     'VBA終了処理
-'    objIE.Quit 'objIEを終了させる
+    objIE.Quit 'objIEを終了させる
     ExitMsg = "登録処理が完了しました。"
     MsgBox ExitMsg
+
+End Sub
+
+Sub getISBNAnswers(htmlDoc As HTMLDocument, ISSheet As Worksheet)
+    
+    '結果処理変数
+    Dim ResultRecord As HTMLDivElement 'Record単位データ
+    Dim ResultTitle As HTMLDivElement 'タイトル名
+    Dim ResultText As HTMLDivElement '結果テキスト
+    Dim i As Long
+    i = 2
+    
+    For Each ResultRecord In htmlDoc.getElementsByClassName("isbn-result__box")
+    
+        Set ResultText = ResultRecord.getElementsByClassName("isbn-result__box--msg")(0)
+        Set ResultTitle = ResultRecord.getElementsByClassName("isbn-result__box--title")(0)
+        
+        ISSheet.Cells(i, 4).Value = ResultText.innerText
+        
+        If (ResultTitle Is Nothing) = False Then
+            ISSheet.Cells(i, 3).Value = ResultTitle.innerText
+        End If
+                
+        i = i + 1
+    Next ResultRecord
 
 End Sub
 
