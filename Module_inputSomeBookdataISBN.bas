@@ -52,14 +52,23 @@ Sub inputSomeBookdataISBN()
     htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN
     htmlDoc.getElementsByClassName("send isbn")(0).Click
 
-    'フォーム入力後の操作検証
-    'URLを開いてオブジェクト取得
-'    objIE.navigate InputISBNPage 'IEでURLを開く
+    'フォーム結果HTML取得
     Call WaitResponse(objIE) '読み込み待ち
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--isbn")(0).innerText
-    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
-    ISSheet.Cells(2, 3).Value = htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
+    
+'    'データ検証用
+'    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--isbn")(0).innerText
+'    Debug.Print htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
+'    ISSheet.Cells(2, 3).Value = htmlDoc.getElementsByClassName("isbn-result__box--msg")(0).innerText
+
+    '結果取得
+    Dim ResultISBN As HTMLDivElement
+    i = 2
+    For Each ResultISBN In htmlDoc.getElementsByClassName("isbn-result__box--msg")
+        ISSheet.Cells(i, 3).Value = ResultISBN.innerText
+        i = i + 1
+    Next ResultISBN
+
 
     'VBA終了処理
 '    objIE.Quit 'objIEを終了させる
