@@ -154,7 +154,7 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
         
         SWSheet.Shapes.AddPicture _
           fileName:=ImgURL.src, _
-            LinkToFile:=True, _
+            LinkToFile:=False, _
             SaveWithDocument:=True, _
             Left:=ActCell.Left, _
             Top:=ActCell.Top, _
