@@ -51,10 +51,42 @@ Sub inputSomeBookdataISBN()
     htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN
     htmlDoc.getElementsByClassName("send isbn")(0).Click
 
+    'フォーム結果HTML取得
+    Call WaitResponse(objIE) '読み込み待ち
+    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+    
+    'フォーム処理結果取得
+    Call getISBNAnswers(htmlDoc, ISSheet)
+
     'VBA終了処理
     objIE.Quit 'objIEを終了させる
-    ExitMsg = "本を登録しました。"
+    ExitMsg = "登録処理が完了しました。"
     MsgBox ExitMsg
+
+End Sub
+
+Sub getISBNAnswers(htmlDoc As HTMLDocument, ISSheet As Worksheet)
+    
+    '結果処理変数
+    Dim ResultRecord As HTMLDivElement 'Record単位データ
+    Dim ResultTitle As HTMLDivElement 'タイトル名
+    Dim ResultText As HTMLDivElement '結果テキスト
+    Dim i As Long
+    i = 2
+    
+    For Each ResultRecord In htmlDoc.getElementsByClassName("isbn-result__box")
+    
+        Set ResultText = ResultRecord.getElementsByClassName("isbn-result__box--msg")(0)
+        Set ResultTitle = ResultRecord.getElementsByClassName("isbn-result__box--title")(0)
+        
+        ISSheet.Cells(i, 4).Value = ResultText.innerText
+        
+        If (ResultTitle Is Nothing) = False Then
+            ISSheet.Cells(i, 3).Value = ResultTitle.innerText
+        End If
+                
+        i = i + 1
+    Next ResultRecord
 
 End Sub
 
