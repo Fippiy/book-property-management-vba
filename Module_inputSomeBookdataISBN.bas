@@ -18,7 +18,7 @@ Sub inputSomeBookdataISBN()
         Dim InputISBN As Collection 'データ取得
         Set InputISBN = New Collection
         Dim ISBNAllCount As Integer 'ISBN総数
-        Const LimitEntry As Integer = 3 'フォーム入力ISBN上限
+        Const LimitEntry As Integer = 20 'フォーム入力ISBN上限
         Dim EntryISBN() As String 'フォーム入力用csv(上限毎)
         Dim MaxRepeat As Long 'ISBN処理回数
         Dim LastISBNCount As Integer '最終ISBN件数
@@ -33,11 +33,6 @@ Sub inputSomeBookdataISBN()
         '処理完了メッセージ
         Dim ExitMsg As String
         
-    'URLを開いてオブジェクト取得
-    objIE.navigate InputISBNPage 'IEでURLを開く
-    Call WaitResponse(objIE) '読み込み待ち
-    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-
     'ISBNコード取得
     Do Until ISSheet.Cells(i, 2).Value = ""
         InputISBN.Add ISSheet.Cells(i, 2).Value
@@ -50,8 +45,8 @@ Sub inputSomeBookdataISBN()
         'ISBN処理回数算出
         MaxRepeat = Application.RoundUp(ISBNAllCount / LimitEntry, 0) '繰り返し回数
         LastISBNCount = ISBNAllCount Mod LimitEntry '繰り返しラスト取得件数
+        ReDim EntryISBN(MaxRepeat - 1) '配列として要素指定して再宣言
         ElementCounter = 1 '要素取得カウンタ初期値
-        ReDim EntryISBN(MaxRepeat - 1) '配列としてISBN格納
         
         'Web処理上限毎に処理できるようにする
         For j = 0 To MaxRepeat - 1
@@ -70,10 +65,17 @@ Sub inputSomeBookdataISBN()
     '全件処理完了まで繰り返し
         
     'カンマ区切りテキストを全て反映させる
-        i = 2 '結果出力テキスト挿入位置初期化
+    i = 2 '結果出力テキスト挿入位置初期化
+        
+    For j = 0 To MaxRepeat - 1
+        
+        'フォームを開く
+        objIE.navigate InputISBNPage 'IEでURLを開く
+        Call WaitResponse(objIE) '読み込み待ち
+        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         
         'フォーム入力
-        htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN(0)
+        htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN(j)
         htmlDoc.getElementsByClassName("send isbn")(0).Click
     
         'フォーム結果HTML取得
@@ -82,6 +84,7 @@ Sub inputSomeBookdataISBN()
         
         'フォーム処理結果取得
         Call getISBNAnswers(htmlDoc, ISSheet, i)
+    Next j
 
     '全件処理完了まで繰り返し
 
