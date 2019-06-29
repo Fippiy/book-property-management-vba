@@ -43,15 +43,27 @@ Sub deleteBookdataISBN()
     Else
         
         i = 1 '繰り返し初期化
+        Dim objHTTP As Object 'HTTPチェック用オブジェクト
+        Dim HTTPStatus As Integer
         Do
-            DelBookPage = DelBookPageBase & DelID(i)
+            DelBookPage = DelBookPageBase & DelID(i) '削除書籍URL取得
+            
+            'URL指定先の確認
+            Set objHTTP = CreateObject("MSXML2.XMLHTTP") 'IXMLHTTPRequestオブジェクト生成(ライブラリなし)
+            objHTTP.Open "HEAD", DelBookPage, False 'IXMLHTTPRequestオブジェクト初期化
+            objHTTP.send 'IXMLHTTPRequestリクエスト送信
+            Do While objHTTP.readyState < READYSTATE_COMPLETE '読み込み待ち
+                DoEvents
+            Loop
+            HTTPStatus = objHTTP.Status 'HTTPリクエスト結果格納
+        
+            
+            
             'URLを開いてオブジェクト取得
             objIE.navigate DelBookPage 'IEでURLを開く
             Call WaitResponse(objIE) '読み込み待ち
             Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-    
-            '存在しないページに対しての処理
-            
+                
             '書籍を消す
             htmlDoc.getElementsByClassName("nav-btn delete")(0).Click
             '削除後の処理
