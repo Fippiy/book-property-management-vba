@@ -2,13 +2,12 @@ Attribute VB_Name = "Module_deleteBookDataID"
 Option Explicit
 
 Sub deleteBookdataISBN()
-
+    
     'オブジェクト設定
         'IE
         Dim objIE As InternetExplorer 'IEオブジェクトを準備
         Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-        objIE.Visible = True 'IEを表示
-'        objIE.Visible = False 'IEを表示
+        objIE.Visible = False 'IEを表示
         'HTML
         Dim htmlDoc As HTMLDocument 'HTML全体
         '作業ワークシート
@@ -17,25 +16,22 @@ Sub deleteBookdataISBN()
         '削除ID
         Dim DelID As Collection
         Set DelID = New Collection
-        'データ取得URL
+        '詳細ページURLベース
         Dim DelBookPageBase As String
-        Dim DelBookPage As String
-        Dim DelBookURL As String
         DelBookPageBase = "https://protected-fortress-61913.herokuapp.com/book/"
         '繰り返し処理
         Dim i As Integer
         i = 2 '2行目から数値取得
         '処理完了メッセージ
         Dim ExitMsg As String
-        
-    '削除ID取得
+    
+    '削除IDをワークシートから取得
     Do Until DelBookSheet.Cells(i, 1).Value = ""
         DelID.Add DelBookSheet.Cells(i, 1).Value
         i = i + 1
     Loop
-        
-        
-    '削除ID毎に処理
+    
+    '取得したIDコレクションから処理を実施
     If DelID.Count = 0 Then
         
         ExitMsg = "削除IDがありません"
@@ -43,43 +39,50 @@ Sub deleteBookdataISBN()
     Else
         
         'オブジェクト宣言
-        i = 1 '繰り返し初期化
+        Dim BookProcess As Range '処理結果格納セル
+        Dim DelBookPage As String '削除書籍ページ
+        Dim DelBookURLAfter As String '削除後遷移するサイトのURL
         Dim HTTPStatus As Integer 'HTTPリクエストステータス
-
+        
+        i = 1 '繰り返し初期化
+        
         'URL毎に削除を実施
-            
+        
         Do
+            
             DelBookPage = DelBookPageBase & DelID(i) '削除書籍URL取得
+            Set BookProcess = DelBookSheet.Cells(i + 1, 2) '処理結果反映セル
             
             'HTTPリクエストステータスを確認
             Call CheckHTTPRequest(DelBookPage, HTTPStatus)
             
-            'HTTPステータスによる処理分岐
-            
-            'if 500時
+            'HTTPリクエスト=200なら、削除処理を実施
+            If HTTPStatus = 200 Then
                 
                 'URLを開いてオブジェクト取得
                 objIE.navigate DelBookPage 'IEでURLを開く
                 Call WaitResponse(objIE) '読み込み待ち
                 Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-                    
+                
                 '書籍を消す
                 htmlDoc.getElementsByClassName("nav-btn delete")(0).Click
                 '削除後の処理
                 Call WaitResponse(objIE) '読み込み待ち
-                DelBookURL = objIE.document.URL & "/" '読み込み後のURL取得
-            
-                If DelBookURL = DelBookPageBase Then
-                    DelBookSheet.Cells(i + 1, 2).Value = "削除しました"
+                DelBookURLAfter = objIE.document.URL & "/" '読み込み後のURL取得
+                
+                '結果をワークシートへ出力
+                If DelBookURLAfter = DelBookPageBase Then
+                    DelBookSheet.Range(BookProcess.Address).Value = "削除しました"
                 Else
-                    DelBookSheet.Cells(i + 1, 2).Value = "削除できませんでした"
+                    DelBookSheet.Range(BookProcess.Address).Value = "削除できませんでした"
                 End If
             
-            'else 500以外
+            'HTTPリクエスト<>200は、エラーとして結果を返す
+            Else
+                
+                DelBookSheet.Range(BookProcess.Address).Value = "接続エラー(" & HTTPStatus & ")"
             
-                '指定したサイトにアクセスできない
-            
-            'endif
+            End If
             
             i = i + 1 '次データ処理開始準備
         
@@ -88,10 +91,9 @@ Sub deleteBookdataISBN()
         ExitMsg = "削除処理が完了しました"
     
     End If
-        
-
+    
     'VBA終了処理
-'    objIE.Quit 'objIEを終了させる
+    objIE.Quit 'objIEを終了させる
     MsgBox ExitMsg
 
 End Sub
