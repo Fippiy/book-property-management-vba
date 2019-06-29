@@ -42,41 +42,47 @@ Sub deleteBookdataISBN()
     
     Else
         
+        'オブジェクト宣言
         i = 1 '繰り返し初期化
-        Dim objHTTP As Object 'HTTPチェック用オブジェクト
-        Dim HTTPStatus As Integer
+        Dim HTTPStatus As Integer 'HTTPリクエストステータス
+
+        'URL毎に削除を実施
+            
         Do
             DelBookPage = DelBookPageBase & DelID(i) '削除書籍URL取得
             
-            'URL指定先の確認
-            Set objHTTP = CreateObject("MSXML2.XMLHTTP") 'IXMLHTTPRequestオブジェクト生成(ライブラリなし)
-            objHTTP.Open "HEAD", DelBookPage, False 'IXMLHTTPRequestオブジェクト初期化
-            objHTTP.send 'IXMLHTTPRequestリクエスト送信
-            Do While objHTTP.readyState < READYSTATE_COMPLETE '読み込み待ち
-                DoEvents
-            Loop
-            HTTPStatus = objHTTP.Status 'HTTPリクエスト結果格納
-        
+            'HTTPリクエストステータスを確認
+            Call CheckHTTPRequest(DelBookPage, HTTPStatus)
             
+            'HTTPステータスによる処理分岐
             
-            'URLを開いてオブジェクト取得
-            objIE.navigate DelBookPage 'IEでURLを開く
-            Call WaitResponse(objIE) '読み込み待ち
-            Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+            'if 500時
                 
-            '書籍を消す
-            htmlDoc.getElementsByClassName("nav-btn delete")(0).Click
-            '削除後の処理
-            Call WaitResponse(objIE) '読み込み待ち
-            DelBookURL = objIE.document.URL & "/" '読み込み後のURL取得
+                'URLを開いてオブジェクト取得
+                objIE.navigate DelBookPage 'IEでURLを開く
+                Call WaitResponse(objIE) '読み込み待ち
+                Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+                    
+                '書籍を消す
+                htmlDoc.getElementsByClassName("nav-btn delete")(0).Click
+                '削除後の処理
+                Call WaitResponse(objIE) '読み込み待ち
+                DelBookURL = objIE.document.URL & "/" '読み込み後のURL取得
             
-            If DelBookURL = DelBookPageBase Then
-                DelBookSheet.Cells(i + 1, 2).Value = "削除しました"
-            Else
-                DelBookSheet.Cells(i + 1, 2).Value = "削除できませんでした"
-            End If
+                If DelBookURL = DelBookPageBase Then
+                    DelBookSheet.Cells(i + 1, 2).Value = "削除しました"
+                Else
+                    DelBookSheet.Cells(i + 1, 2).Value = "削除できませんでした"
+                End If
+            
+            'else 500以外
+            
+                '指定したサイトにアクセスできない
+            
+            'endif
             
             i = i + 1 '次データ処理開始準備
+        
         Loop Until i > DelID.Count
         
         ExitMsg = "削除処理が完了しました"
@@ -94,4 +100,16 @@ Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
     Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
         DoEvents
     Loop
+End Sub
+
+Sub CheckHTTPRequest(DelBookPage As String, HTTPStatus As Integer)
+    Dim objHTTP As Object 'HTTPチェック用オブジェクト
+
+    Set objHTTP = CreateObject("MSXML2.XMLHTTP") 'IXMLHTTPRequestオブジェクト生成(ライブラリなし)
+    objHTTP.Open "HEAD", DelBookPage, False 'IXMLHTTPRequestオブジェクト初期化
+    objHTTP.send 'IXMLHTTPRequestリクエスト送信
+    Do While objHTTP.readyState < READYSTATE_COMPLETE '読み込み待ち
+        DoEvents
+    Loop
+    HTTPStatus = objHTTP.Status 'HTTPリクエスト結果格納
 End Sub
