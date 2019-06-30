@@ -39,8 +39,16 @@ Sub getURLtest()
             htmlDoc.getElementsByName("email")(0).Value = "test"
             htmlDoc.getElementsByName("password")(0).Value = "test"
             htmlDoc.getElementsByClassName("form-group__submit")(0).Click
-'            'フォーム結果HTML取得
-'            Call WaitResponse(objIE) '読み込み待ち
+            
+            'ログイン結果確認
+            Call WaitResponse(objIE) '読み込み待ち
+            ResponseURL = objIE.document.URL '読み込み後のURL取得
+            Debug.Print ResponseURL 'デバッグ確認
+            If ResponseURL = LoginURL Then
+                Debug.Print "ログイン失敗"
+            Else
+                Debug.Print "ログイン成功"
+            End If
         End If
 
 
