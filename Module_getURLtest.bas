@@ -87,6 +87,8 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         Debug.Print ResponseURL 'デバッグ確認
         If ResponseURL = LoginPageURL Then
             LoginAnswer = "ログイン失敗"
+            'オブジェクト終了処理を実施しておく
+            objIE.Quit 'objIEを終了させる
             'ログイン失敗時はアラートをメッセージとして返す
             ExitMsg = "ログインに失敗しました。"
             MsgBox ExitMsg
