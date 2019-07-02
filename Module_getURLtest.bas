@@ -27,7 +27,7 @@ Sub getURLtest()
                 
     'ログイン状態チェック
     Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
-
+    
     'VBA各種処理の実施
     
         'navigate時にログイン状態を確認として挿入
@@ -44,17 +44,19 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         
     'オブジェクト設定
         
-        'ログイン設定
+        'ログイン設定(ディレクトリ)
         Dim LoginDir As String 'ログインディレクトリ
         LoginDir = "login" 'ログインディレクトリ指定
         Dim LoginPageURL As String 'ログインページURL
         LoginPageURL = Domain & LoginDir 'ログインページURL生成
+        'ログイン設定(Web送信情報)
         Dim LoginEmail As String 'ログインメールアドレス
         Dim LoginPassword As String 'ログインパスワード
-        
+        LoginEmail = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 1).Value 'Email
+        LoginPassword = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 2).Value 'Password
+        '処理結果確認
         Dim LoginAnswer As String 'ログイン結果確認用
         Dim ExitMsg As String 'メッセージ表示用
-        
         'URL取得設定
         Dim ProcessPageURL As String '処理実施ページURL
         Dim ResponseURL As String '処理実施ページ表示後URL取得
@@ -75,8 +77,8 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
     If ResponseURL = LoginPageURL Then
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         'フォーム入力
-        htmlDoc.getElementsByName("email")(0).Value = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 1)
-        htmlDoc.getElementsByName("password")(0).Value = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 2)
+        htmlDoc.getElementsByName("email")(0).Value = LoginEmail
+        htmlDoc.getElementsByName("password")(0).Value = LoginPassword
         htmlDoc.getElementsByClassName("form-group__submit")(0).Click
         
         'ログイン結果確認
