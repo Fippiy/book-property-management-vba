@@ -65,14 +65,11 @@ Sub inputSomeBookdataISBN()
         'ISBN処理回数算出
         MaxRepeat = Application.RoundUp(ISBNAllCount / LimitEntry, 0) '繰り返し回数
         LastISBNCount = ISBNAllCount Mod LimitEntry '繰り返しラスト取得件数
-'        ReDim EntryISBN(MaxRepeat - 1) '配列として要素指定して再宣言
-'            '※→一1 to MaxRepeatで1始まりの終了値指定で配列宣言できるぞ？
         ReDim EntryISBN(1 To MaxRepeat) '配列として要素指定して再宣言
 
         ElementCounter = 1 '要素取得カウンタ初期値
         
         'Web処理上限毎に処理できるようにする
-'        For j = 0 To MaxRepeat - 1
         For j = 1 To MaxRepeat
         
             i = 1 '繰り返し変数初期化
@@ -92,15 +89,9 @@ Sub inputSomeBookdataISBN()
     'カンマ区切りテキストを全て反映させる
     i = 2 '結果出力テキスト挿入位置初期化
         
-'    For j = 0 To MaxRepeat - 1
     For j = 1 To MaxRepeat
         
-'        'フォームを開く
-'        objIE.navigate InputISBNPage 'IEでURLを開く
-'        Call WaitResponse(objIE) '読み込み待ち
-'        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-            '※→一フォーム展開全体はログインプロシージャへまかせて、HTMLを取得してくる
-        'ログイン状態チェック
+        'ログイン状態チェックとHTML取得
         Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
         
         'フォーム入力
