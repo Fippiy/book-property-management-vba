@@ -152,9 +152,6 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         Dim LoginPassword As String 'ログインパスワード
         LoginEmail = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 1).Value 'Email
         LoginPassword = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 2).Value 'Password
-        '処理結果確認
-'        Dim LoginAnswer As String 'ログイン結果確認用
-        Dim ExitMsg As String 'メッセージ表示用
         'URL取得設定
         Dim ProcessPageURL As String '処理実施ページURL
         Dim ResponseURL As String '処理実施ページ表示後URL取得
@@ -174,7 +171,7 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
     'ログイン画面表示時はログイン処理
     If ResponseURL = LoginPageURL Then
         Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-        'フォーム入力
+        'ログインフォーム入力
         htmlDoc.getElementsByName("email")(0).Value = LoginEmail
         htmlDoc.getElementsByName("password")(0).Value = LoginPassword
         htmlDoc.getElementsByClassName("form-group__submit")(0).Click
@@ -182,35 +179,16 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         'ログイン結果確認
         Call WaitResponse(objIE) '読み込み待ち
         ResponseURL = objIE.document.URL '読み込み後のURL取得
-        Debug.Print ResponseURL 'デバッグ確認
-        If ResponseURL = LoginPageURL Then
-'            LoginAnswer = "ログイン失敗"
-            'オブジェクト終了処理を実施しておく
+        If ResponseURL = LoginPageURL Then 'ログインURLのままは失敗
+            'ログイン失敗として終了する
             objIE.Quit 'objIEを終了させる
-            'ログイン失敗時はアラートをメッセージとして返す
-            ExitMsg = "ログインに失敗しました。"
-            MsgBox ExitMsg
-            '続きの処理はせずに終了
-            End
-        Else
-'            LoginAnswer = "ログイン成功"
+            MsgBox "ログインに失敗しました。"
+            End '続きの処理はせずに終了
         End If
-    Else
-'        LoginAnswer = "ログイン済み"
     End If
     
     'ログイン済みorログイン後サイトのHTMLオブジェクト取得
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-    
-'    '結果確認情報
-'    Debug.Print "結果表示開始"
-'    Debug.Print "CheckFirstLogin " & CheckFirstLogin
-'    Debug.Print LoginAnswer
-'    Debug.Print "ProcessPageURL " & ProcessPageURL
-'    Debug.Print "ProcessDir " & ProcessDir
-'    Debug.Print "Web表示Titleタグ " & htmlDoc.getElementsByTagName("title")(0).innerText
-'    Debug.Print "結果表示終了"
-'    Debug.Print ""
     
     '初回処理終了処理
     If CheckFirstLogin = True Then CheckFirstLogin = False
