@@ -3,23 +3,35 @@ Option Explicit
 
 Sub inputSomeBookdataISBN()
 
-    'オブジェクト設定
+    '===↓VBA全体オブジェクト設定↓===
         
-        'IE
+        'IEオブジェクト
         Dim objIE As InternetExplorer 'IEオブジェクトを準備
         Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
         objIE.Visible = False 'IEを表示
-        
-        'HTML
+        'HTMLオブジェクト
         Dim htmlDoc As HTMLDocument 'HTML全体
+        'データ取得URL
+        Dim Domain As String 'Webドメイン名
+        Dim ProcessDir As String '処理実施ディレクトリ
+        Domain = "https://protected-fortress-61913.herokuapp.com/"
+        ProcessDir = "book/isbn_some_input"
+        'VBA動作初回ログインチェック
+        Dim CheckFirstLogin As Boolean 'ログインチェックフラグ
+        CheckFirstLogin = True
+            
+    '===↑VBA全体オブジェクト設定↑===
+            
+    'ログイン状態チェック
+    Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
         
-        '作業ワークシート
+    '===↓処理用オブジェクト設定↓===
+
+        '作業ワークシート設定
         Dim ISSheet As Worksheet 'ISBNWorksheet
         Set ISSheet = ThisWorkbook.Worksheets("ISBN")
-        
-        
-        '登録ISBN
-            '※→一ログインチェックしてから使用
+            
+        '登録ISBNコード取得設定
         Dim InputISBN As Collection 'データ取得
         Set InputISBN = New Collection
         Dim ISBNAllCount As Integer 'ISBN総数
@@ -28,55 +40,40 @@ Sub inputSomeBookdataISBN()
         Dim MaxRepeat As Long 'ISBN処理回数
         Dim LastISBNCount As Integer '最終ISBN件数
         Dim ElementCounter As Long '要素取得カウンタ
-            '※→一counterオブジェクトがあるようだが？
-        
-        
-        'データ取得URL
-        Dim Domain As String
-        Dim ProcessDir As String
-        Domain = "https://protected-fortress-61913.herokuapp.com/"
-        ProcessDir = "book/isbn_some_input"
-'        Dim InputISBNPage As String
-'        InputISBNPage = Domain & ProcessDir
-'        InputISBNPage = "https://protected-fortress-61913.herokuapp.com/book/isbn_some_input"
-            '※→一ドメイン設定用に再編集
-            '※→一ログインプロシージャでHTMLは取得できる
-
-        
-        '初回ログインチェック
-        Dim CheckFirstLogin As Boolean
-        CheckFirstLogin = True
-        
+            
         '繰り返し処理
         Dim i As Integer
         Dim j As Integer
-        i = 2
-        '処理完了メッセージ
+        
+        '出力メッセージ
         Dim ExitMsg As String
         
-    'ログイン状態チェック
-    Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
-        
+    '===↑処理用オブジェクト設定↑===
     
-    'ISBNコード取得
+    
+    'ワークシートからISBNコード取得
+    i = 2 '1行目インデックスなので2行目から
     Do Until ISSheet.Cells(i, 2).Value = ""
         InputISBN.Add ISSheet.Cells(i, 2).Value
         i = i + 1
     Loop
     ISBNAllCount = InputISBN.Count 'ISBNコード総数
 
+
     'Web上限毎に登録処理をするカンマ区切りテキストを準備
     
         'ISBN処理回数算出
         MaxRepeat = Application.RoundUp(ISBNAllCount / LimitEntry, 0) '繰り返し回数
         LastISBNCount = ISBNAllCount Mod LimitEntry '繰り返しラスト取得件数
-        ReDim EntryISBN(MaxRepeat - 1) '配列として要素指定して再宣言
-            '※→一1 to MaxRepeatで1始まりの終了値指定で配列宣言できるぞ？
+'        ReDim EntryISBN(MaxRepeat - 1) '配列として要素指定して再宣言
+'            '※→一1 to MaxRepeatで1始まりの終了値指定で配列宣言できるぞ？
+        ReDim EntryISBN(1 To MaxRepeat) '配列として要素指定して再宣言
 
         ElementCounter = 1 '要素取得カウンタ初期値
         
         'Web処理上限毎に処理できるようにする
-        For j = 0 To MaxRepeat - 1
+'        For j = 0 To MaxRepeat - 1
+        For j = 1 To MaxRepeat
         
             i = 1 '繰り返し変数初期化
             'カンマ区切りテキスト生成(全ISBN or 上限件数まで)
@@ -91,10 +88,12 @@ Sub inputSomeBookdataISBN()
         
     '全件処理完了まで繰り返し
         
+        
     'カンマ区切りテキストを全て反映させる
     i = 2 '結果出力テキスト挿入位置初期化
         
-    For j = 0 To MaxRepeat - 1
+'    For j = 0 To MaxRepeat - 1
+    For j = 1 To MaxRepeat
         
 '        'フォームを開く
 '        objIE.navigate InputISBNPage 'IEでURLを開く
@@ -163,7 +162,7 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         LoginEmail = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 1).Value 'Email
         LoginPassword = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 2).Value 'Password
         '処理結果確認
-        Dim LoginAnswer As String 'ログイン結果確認用
+'        Dim LoginAnswer As String 'ログイン結果確認用
         Dim ExitMsg As String 'メッセージ表示用
         'URL取得設定
         Dim ProcessPageURL As String '処理実施ページURL
@@ -194,7 +193,7 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
         ResponseURL = objIE.document.URL '読み込み後のURL取得
         Debug.Print ResponseURL 'デバッグ確認
         If ResponseURL = LoginPageURL Then
-            LoginAnswer = "ログイン失敗"
+'            LoginAnswer = "ログイン失敗"
             'オブジェクト終了処理を実施しておく
             objIE.Quit 'objIEを終了させる
             'ログイン失敗時はアラートをメッセージとして返す
@@ -203,24 +202,24 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
             '続きの処理はせずに終了
             End
         Else
-            LoginAnswer = "ログイン成功"
+'            LoginAnswer = "ログイン成功"
         End If
     Else
-        LoginAnswer = "ログイン済み"
+'        LoginAnswer = "ログイン済み"
     End If
     
     'ログイン済みorログイン後サイトのHTMLオブジェクト取得
     Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
-    '結果確認情報
-    Debug.Print "結果表示開始"
-    Debug.Print "CheckFirstLogin " & CheckFirstLogin
-    Debug.Print LoginAnswer
-    Debug.Print "ProcessPageURL " & ProcessPageURL
-    Debug.Print "ProcessDir " & ProcessDir
-    Debug.Print "Web表示Titleタグ " & htmlDoc.getElementsByTagName("title")(0).innerText
-    Debug.Print "結果表示終了"
-    Debug.Print ""
+'    '結果確認情報
+'    Debug.Print "結果表示開始"
+'    Debug.Print "CheckFirstLogin " & CheckFirstLogin
+'    Debug.Print LoginAnswer
+'    Debug.Print "ProcessPageURL " & ProcessPageURL
+'    Debug.Print "ProcessDir " & ProcessDir
+'    Debug.Print "Web表示Titleタグ " & htmlDoc.getElementsByTagName("title")(0).innerText
+'    Debug.Print "結果表示終了"
+'    Debug.Print ""
     
     '初回処理終了処理
     If CheckFirstLogin = True Then CheckFirstLogin = False
