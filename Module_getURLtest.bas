@@ -3,17 +3,24 @@ Option Explicit
 
 Sub getURLtest()
     
+    'クラスモジュール化テスト
+    Dim waitObjIE As waitObjIE
+    Set waitObjIE = New waitObjIE
+    Set waitObjIE.objIE = CreateObject("Internetexplorer.Application")
+'    Debug.Print waitObjIE.objIE
+'    waitObjIE.objIE.Visible = True
+    waitObjIE.objIE.Visible = False
+    
     'オブジェクト設定
         
         'IEオブジェクト
-        Dim objIE As InternetExplorer 'IEオブジェクトを準備
-        Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-        objIE.Visible = False 'IEを表示
+'        Dim objIE As InternetExplorer 'IEオブジェクトを準備
+'        Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
+'        objIE.Visible = False 'IEを表示
 '        objIE.Visible = True 'IEを表示
         
         'HTMLオブジェクト
         Dim htmlDoc As HTMLDocument 'HTML全体
-'        Dim HTTPStatus As Integer 'HTTPリクエストステータス
         
         'URL設定
         Dim Domain As String 'Webドメイン名
@@ -26,21 +33,25 @@ Sub getURLtest()
         CheckFirstLogin = True
                 
     'ログイン状態チェック
-    Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
+'    Call CheckLogin(ObjIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
+    Call CheckLogin(waitObjIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
     
     'VBA各種処理の実施
     
         'navigate時にログイン状態を確認として挿入
-        Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
+'        Call CheckLogin(ObjIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
+        Call CheckLogin(waitObjIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
     
     'VBA各種処理完了
     
-    objIE.Quit 'objIEを終了させる
+'    objIE.Quit 'objIEを終了させる
+    waitObjIE.objIE.Quit 'objIEを終了させる
     MsgBox "処理が完了しました。"
 
 End Sub
 
-Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As String, ProcessDir As String, CheckFirstLogin As Boolean)
+'Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As String, ProcessDir As String, CheckFirstLogin As Boolean)
+Sub CheckLogin(waitObjIE As waitObjIE, htmlDoc As HTMLDocument, Domain As String, ProcessDir As String, CheckFirstLogin As Boolean)
         
     'オブジェクト設定
         
@@ -69,26 +80,33 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
     End If
     
     '処理実施ページへアクセス後、URL取得
-    objIE.navigate ProcessPageURL 'IEで開く
-    Call WaitResponse(objIE) '読み込み待ち
-    ResponseURL = objIE.document.URL 'URL取得
+'    objIE.navigate ProcessPageURL 'IEで開く
+    waitObjIE.objIE.navigate ProcessPageURL
+'    Call WaitResponse(objIE) '読み込み待ち
+    waitObjIE.WaitResponse
+'    ResponseURL = objIE.document.URL 'URL取得
+    ResponseURL = waitObjIE.objIE.document.URL 'URL取得
     
     'ログイン画面表示時はログイン処理
     If ResponseURL = LoginPageURL Then
-        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+'        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+        Set htmlDoc = waitObjIE.objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         'フォーム入力
         htmlDoc.getElementsByName("email")(0).Value = LoginEmail
         htmlDoc.getElementsByName("password")(0).Value = LoginPassword
         htmlDoc.getElementsByClassName("form-group__submit")(0).Click
         
         'ログイン結果確認
-        Call WaitResponse(objIE) '読み込み待ち
-        ResponseURL = objIE.document.URL '読み込み後のURL取得
-        Debug.Print ResponseURL 'デバッグ確認
+'        Call WaitResponse(objIE) '読み込み待ち
+        waitObjIE.WaitResponse
+'        ResponseURL = objIE.document.URL '読み込み後のURL取得
+        ResponseURL = waitObjIE.objIE.document.URL '読み込み後のURL取得
+'        Debug.Print ResponseURL 'デバッグ確認
         If ResponseURL = LoginPageURL Then
             LoginAnswer = "ログイン失敗"
             'オブジェクト終了処理を実施しておく
-            objIE.Quit 'objIEを終了させる
+'            objIE.Quit 'objIEを終了させる
+            waitObjIE.objIE.Quit 'objIEを終了させる
             'ログイン失敗時はアラートをメッセージとして返す
             ExitMsg = "ログインに失敗しました。"
             MsgBox ExitMsg
@@ -102,7 +120,8 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
     End If
     
     'ログイン済みorログイン後サイトのHTMLオブジェクト取得
-    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+'    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+    Set htmlDoc = waitObjIE.objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
     
     '結果確認情報
     Debug.Print "結果表示開始"
@@ -119,8 +138,8 @@ Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As Str
     
 End Sub
 
-Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
-    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
-        DoEvents
-    Loop
-End Sub
+'Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
+'    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
+'        DoEvents
+'    Loop
+'End Sub
