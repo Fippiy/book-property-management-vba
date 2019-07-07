@@ -6,25 +6,24 @@ Sub inputSomeBookdataISBN()
     '===↓VBA全体オブジェクト設定↓===
         
         'IEオブジェクト
-        Dim objIE As InternetExplorer 'IEオブジェクトを準備
-        Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-        objIE.Visible = False 'IEを表示
-        'HTMLオブジェクト
-        Dim htmlDoc As HTMLDocument 'HTML全体
+        Dim waitObjIE As waitObjIE 'IE読み込み待ちモジュール作成
+        Set waitObjIE = New waitObjIE
+        Set waitObjIE.objIE = CreateObject("Internetexplorer.Application")
+        waitObjIE.objIE.Visible = False
+        
         'データ取得URL
-        Dim Domain As String 'Webドメイン名
-        Dim ProcessDir As String '処理実施ディレクトリ
-        Domain = "https://protected-fortress-61913.herokuapp.com/"
-        ProcessDir = "book/isbn_some_input"
-        'VBA動作初回ログインチェック
-        Dim CheckFirstLogin As Boolean 'ログインチェックフラグ
-        CheckFirstLogin = True
+        Dim Login As BookdataLogin 'ログインクラスモジュール作成
+        Set Login = New BookdataLogin
+        Login.Domain = "https://protected-fortress-61913.herokuapp.com/" 'ドメイン格納
+        Login.ProcessDir = "book/isbn_some_input" 'ディレクトリ指定
+        Login.CheckFirstLogin = True 'ログインチェックフラグ
+        Set Login.waitObjIE = waitObjIE 'IEオブジェクトをLoginに引渡
             
     '===↑VBA全体オブジェクト設定↑===
             
     'ログイン状態チェック
-    Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
-        
+    Login.CheckLogin
+    
     '===↓処理用オブジェクト設定↓===
 
         '作業ワークシート設定
@@ -92,24 +91,25 @@ Sub inputSomeBookdataISBN()
     For j = 1 To MaxRepeat
         
         'ログイン状態チェックとHTML取得
-        Call CheckLogin(objIE, htmlDoc, Domain, ProcessDir, CheckFirstLogin)
+        Login.CheckLogin
         
         'フォーム入力
-        htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN(j)
-        htmlDoc.getElementsByClassName("send isbn")(0).Click
+        Login.htmlDoc.getElementsByClassName("form-input__detail")(0).Value = EntryISBN(j)
+        Login.htmlDoc.getElementsByClassName("send isbn")(0).Click
     
         'フォーム結果HTML取得
-        Call WaitResponse(objIE) '読み込み待ち
-        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
+        waitObjIE.WaitResponse '読み込み待ち
+        Set Login.htmlDoc = waitObjIE.objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         
         'フォーム処理結果取得
-        Call getISBNAnswers(htmlDoc, ISSheet, i)
+        Call getISBNAnswers(Login.htmlDoc, ISSheet, i)
+    
     Next j
 
     '全件処理完了まで繰り返し
 
     'VBA終了処理
-    objIE.Quit 'objIEを終了させる
+    waitObjIE.objIE.Quit 'objIEを終了させる
     ExitMsg = "登録処理が完了しました。"
     MsgBox ExitMsg
 
@@ -136,67 +136,4 @@ Sub getISBNAnswers(htmlDoc As HTMLDocument, ISSheet As Worksheet, i As Integer)
         i = i + 1
     Next ResultRecord
 
-End Sub
-
-Sub CheckLogin(objIE As InternetExplorer, htmlDoc As HTMLDocument, Domain As String, ProcessDir As String, CheckFirstLogin As Boolean)
-        
-    'オブジェクト設定
-        
-        'ログイン設定(ディレクトリ)
-        Dim LoginDir As String 'ログインディレクトリ
-        LoginDir = "login" 'ログインディレクトリ指定
-        Dim LoginPageURL As String 'ログインページURL
-        LoginPageURL = Domain & LoginDir 'ログインページURL生成
-        'ログイン設定(Web送信情報)
-        Dim LoginEmail As String 'ログインメールアドレス
-        Dim LoginPassword As String 'ログインパスワード
-        LoginEmail = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 1).Value 'Email
-        LoginPassword = ThisWorkbook.Worksheets("ログイン設定").Cells(2, 2).Value 'Password
-        'URL取得設定
-        Dim ProcessPageURL As String '処理実施ページURL
-        Dim ResponseURL As String '処理実施ページ表示後URL取得
-        
-    '処理実施ページ決定
-    If CheckFirstLogin = True Then
-        ProcessPageURL = LoginPageURL 'ログインページURL生成
-    Else
-        ProcessPageURL = Domain & ProcessDir '処理実施ページURL生成
-    End If
-    
-    '処理実施ページへアクセス後、URL取得
-    objIE.navigate ProcessPageURL 'IEで開く
-    Call WaitResponse(objIE) '読み込み待ち
-    ResponseURL = objIE.document.URL 'URL取得
-    
-    'ログイン画面表示時はログイン処理
-    If ResponseURL = LoginPageURL Then
-        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-        'ログインフォーム入力
-        htmlDoc.getElementsByName("email")(0).Value = LoginEmail
-        htmlDoc.getElementsByName("password")(0).Value = LoginPassword
-        htmlDoc.getElementsByClassName("form-group__submit")(0).Click
-        
-        'ログイン結果確認
-        Call WaitResponse(objIE) '読み込み待ち
-        ResponseURL = objIE.document.URL '読み込み後のURL取得
-        If ResponseURL = LoginPageURL Then 'ログインURLのままは失敗
-            'ログイン失敗として終了する
-            objIE.Quit 'objIEを終了させる
-            MsgBox "ログインに失敗しました。"
-            End '続きの処理はせずに終了
-        End If
-    End If
-    
-    'ログイン済みorログイン後サイトのHTMLオブジェクト取得
-    Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-    
-    '初回処理終了処理
-    If CheckFirstLogin = True Then CheckFirstLogin = False
-    
-End Sub
-
-Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
-    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
-        DoEvents
-    Loop
 End Sub
