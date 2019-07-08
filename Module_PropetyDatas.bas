@@ -5,17 +5,11 @@ Sub getBookdatasDatail()
 
     '===↓VBA全体オブジェクト設定↓===
 
-'        'オブジェクト設定
-'        'IE
-'        Dim objIE As InternetExplorer 'IEオブジェクトを準備
-'        Set objIE = CreateObject("Internetexplorer.Application") '新しいIEオブジェクトを作成してセット
-'        objIE.Visible = False 'IEを表示
         'IEオブジェクト
         Dim waitObjIE As waitObjIE 'IE読み込み待ちモジュール作成
         Set waitObjIE = New waitObjIE
         Set waitObjIE.objIE = CreateObject("Internetexplorer.Application")
         waitObjIE.objIE.Visible = False
-'        waitObjIE.objIE.Visible = True
         
         'データ取得URL
         Dim Login As BookdataLogin 'ログインクラスモジュール作成
@@ -32,17 +26,11 @@ Sub getBookdatasDatail()
         
     '===↓処理用オブジェクト設定↓===
         
-'        'HTML
-'        Dim htmlDoc As HTMLDocument 'HTML全体
-        
         Dim Pagination As HTMLUListElement 'HTMLページネーション
         Dim PagiLink As HTMLAnchorElement '次ページリンク
         '作業ワークシート
         Dim SWSheet As Worksheet 'ScrapingWorksheet
         Set SWSheet = ThisWorkbook.Worksheets("スクレイピング")
-        'データ取得URL
-'        Dim OpenPage As String
-'        OpenPage = "https://protected-fortress-61913.herokuapp.com/book"
         '繰り返し処理
         Dim i As Integer
         i = 1
@@ -57,22 +45,14 @@ Sub getBookdatasDatail()
     '===↑処理用オブジェクト設定↑===
 
     'OpenPageがある間はループして続ける
-'    Do Until OpenPage = ""
     Do Until Login.ProcessDir = ""
         
-'        objIE.navigate OpenPage 'IEでURLを開く
         Login.CheckLogin
-'        Call WaitResponse(objIE) '読み込み待ち
-'        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
-'        OpenPage = "" 'データ取得URL初期化
         
         '詳細ページURL取得
-'        Call getBookList(htmlDoc, i, URLCol)
-'        Call getBookList(Login.htmlDoc, i, URLCol)
         Call getBookList(Login.htmlDoc, i, URLCol, Login)
         
         'ページネーション処理
-'        Set Pagination = htmlDoc.getElementsByClassName("pagination")(0)
         Set Pagination = Login.htmlDoc.getElementsByClassName("pagination")(0)
         
         If Not Pagination Is Nothing Then
@@ -81,8 +61,6 @@ Sub getBookdatasDatail()
             'ページネーションがある場合は取得処理
             For Each PagiLink In Pagination.getElementsByTagName("a")
                 If InStr(PagiLink.outerHTML, "rel=""next") > 0 Then
-'                    OpenPage = PagiLink.href
-'                    Login.ProcessDir = PagiLink.href
                     Login.ProcessDir = Replace(PagiLink.href, Login.Domain, "")
                 End If
             Next PagiLink
@@ -94,8 +72,6 @@ Sub getBookdatasDatail()
     
     '詳細ページURLがなければ終了する
     If URLCol.Count > 0 Then
-'        Call getDetailBookdata(SWSheet, objIE, URLCol)
-'        Call getDetailBookdata(SWSheet, waitObjIE.objIE, URLCol)
         Call getDetailBookdata(SWSheet, waitObjIE.objIE, URLCol, Login)
  
         ExitMsg = "データ取得が完了しました。"
@@ -141,8 +117,6 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     '詳細ページURLから詳細内容を取得
     
     'データ取得URL
-'    Dim OpenPage As String
-'    Dim htmlDoc As HTMLDocument 'HTML全体
     Dim DocContent As HTMLDivElement 'HTMLコンテンツ処理
     Dim DocColumn As HTMLDivElement 'column情報
     Dim i As Long, j As Long '書き出し用行列処理
@@ -170,17 +144,13 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     Do
         
         '次ページURL取得
-'        OpenPage = URLCol(URLi)
         Login.ProcessDir = URLCol(URLi)
         
+        '次ページへアクセス
         Login.CheckLogin
-'        objIE.navigate OpenPage 'IEでURLを開く
-'        Call WaitResponse(objIE) '読み込み待ち
-'        Set htmlDoc = objIE.document 'objIEで読み込まれているHTMLドキュメントをセット
         j = 1
         
         '1列目にID番号表示
-'        GetUrl = OpenPage 'URL取得
         GetUrl = Login.ProcessDir 'URL取得
         GetUrlData = Split(GetUrl, "/")  'URL要素取得
         GetUrlElement = UBound(GetUrlData)  'URL要素確認
@@ -189,7 +159,6 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
         j = j + 1
         
         '2列目に画像表示
-'        Set DocPicture = htmlDoc.getElementsByClassName("book-detail__picture")(0)
         Set DocPicture = Login.htmlDoc.getElementsByClassName("book-detail__picture")(0)
         Set ImgURL = DocPicture.getElementsByTagName("img")(0)
         Set ActCell = SWSheet.Cells(i, j)
@@ -204,15 +173,12 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
             Height:=100
         j = j + 1
         
-        
         '3列目以降にテキスト表示
-'        For Each DocContent In htmlDoc.getElementsByClassName("document-content")
         For Each DocContent In Login.htmlDoc.getElementsByClassName("document-content")
             Set DocColumn = DocContent.getElementsByClassName("document-content__column")(0)
             SWSheet.Cells(i, j).Value = DocColumn.innerHTML
             j = j + 1
         Next DocContent
-        
         
         'カウント追加
         i = i + 1
@@ -222,9 +188,3 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     Loop Until URLi > fornumber
     
 End Sub
-
-'Sub WaitResponse(objIE As Object) 'Webブラウザ表示完了待ち
-'    Do While objIE.Busy = True Or objIE.readyState < READYSTATE_COMPLETE '読み込み待ち
-'        DoEvents
-'    Loop
-'End Sub
