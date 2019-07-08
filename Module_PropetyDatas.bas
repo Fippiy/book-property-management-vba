@@ -59,7 +59,6 @@ Sub getBookdatasDatail()
         Login.CheckLogin
         
         '詳細ページURL取得
-'        Call getBookList(Login.htmlDoc, i, URLCol, Login)
         Call getBookList(Login.htmlDoc, i, URLCol, Login, arrBooksId)
         
         'ページネーション処理
@@ -83,10 +82,8 @@ Sub getBookdatasDatail()
     '詳細ページURLがなければ終了する
     If URLCol.Count > 0 Then
         Call getDetailBookdata(SWSheet, waitObjIE.objIE, URLCol, Login, MaxRow)
- 
         ExitMsg = "データ取得が完了しました。"
     Else
-'        ExitMsg = "取得データがありません"
         ExitMsg = "新規取得データはありませんでした"
     End If
 
@@ -154,8 +151,6 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     'データ取得URL
     Dim DocContent As HTMLDivElement 'HTMLコンテンツ処理
     Dim DocColumn As HTMLDivElement 'column情報
-'    Dim i As Long, j As Long '書き出し用行列処理
-'    i = 2
     Dim j As Long '書き出し用行列処理
 
     Dim URLi As Long '詳細URL読み込み行番号処理
@@ -217,7 +212,6 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
         Next DocContent
         
         'カウント追加
-'        i = i + 1
         URLi = URLi + 1
         
     'URL要素数を超える場合はループ終了
