@@ -153,3 +153,25 @@ End Sub
 '    Loop
 'End Sub
 
+'ワークシート内オブジェクト取得テスト
+Sub testobjname()
+    Dim strObjName() As String
+    Dim intObj As Integer
+    Dim i As Integer
+
+    'アクティブシートのShapes数をカウント
+    intObj = ActiveSheet.Shapes.Count
+    '配列を再宣言
+    ReDim strObjName(intObj)
+
+    '配列strObjNameにオブジェクト名を代入
+    For i = 1 To intObj
+        strObjName(i) = ActiveSheet.Shapes(i).Name
+    Next i
+
+    '配列strObjNameに代入されたオブジェクト名を表示
+    For i = 1 To intObj
+'        MsgBox strObjName(i)
+        Debug.Print strObjName(i)
+    Next i
+End Sub
