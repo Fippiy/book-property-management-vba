@@ -171,6 +171,10 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     Dim GetUrlElement As Integer 'URLSplit要素数
     Dim GetID As Integer 'ID番号
 
+    '画像オブジェクト処理
+    Dim objCount As Long 'オブジェクト総数
+    objCount = SWSheet.Shapes.Count '総数取得
+    
     '詳細ページを開いて中のデータを取得
     Do
         i = i + 1
@@ -202,6 +206,9 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
             Top:=ActCell.Top, _
             Width:=100, _
             Height:=100
+        '画像名付与
+        objCount = objCount + 1 '新規オブジェクト指定
+        ActiveSheet.Shapes(objCount).Name = GetID 'ID名を付与
         j = j + 1
         
         '3列目以降にテキスト表示
