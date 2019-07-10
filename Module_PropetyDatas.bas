@@ -51,8 +51,12 @@ Sub getBookdatasDatail()
     'ワークシート書籍情報取得
     MaxRow = SWSheet.Cells(Rows.Count, 1).End(xlUp).Row 'ワークシート要素の最終セル
     Set books = SWSheet.Range(Cells(2, 1), Cells(MaxRow, 1)) 'ワークシートID一覧取得
-    arrBooksId = books '配列化
-    
+'    arrBooksId = books '配列化
+    arrBooksId = WorksheetFunction.Transpose(books) '配列化
+'    Dim arrtest As Variant
+'    arrtest = WorksheetFunction.Transpose(arrBooksId)
+'    arrBooksId = WorksheetFunction.Transpose(arrBooksId)
+'    ReDim Preserve arrBooksId(1 To UBound(arrBooksId))
     'OpenPageがある間はループして続ける
     Do Until Login.ProcessDir = ""
         
@@ -78,13 +82,20 @@ Sub getBookdatasDatail()
         
     Loop 'OpenPageループエンド
 
+
+    '削除書籍があれば削除する
+    If arrBooksId(1) <> "NoDeleteObject" Then
+        '削除処理実装
+        Call deleteBookdata(SWSheet, arrBooksId, MaxRow)
+        ExitMsg = "削除処理を行いました。"
+    End If
     
     '詳細ページURLがなければ終了する
     If URLCol.Count > 0 Then
         Call getDetailBookdata(SWSheet, waitObjIE.objIE, URLCol, Login, MaxRow)
-        ExitMsg = "データ取得が完了しました。"
+        ExitMsg = ExitMsg & "データ取得が完了しました。"
     Else
-        ExitMsg = "新規取得データはありませんでした"
+        ExitMsg = ExitMsg & "新規取得データはありませんでした"
     End If
 
 
@@ -110,7 +121,12 @@ Sub getBookList(htmlDoc As HTMLDocument, i As Integer, URLCol As Collection, Log
     Dim getIdElement As Long
     Dim getBookdataId As Long
     
+    Dim test As Long
+    Dim testi As Long
+    
     For Each Bookdata In htmlDoc.getElementsByClassName("book-table__list")
+        
+        test = 1
         
         '--detail情報からデータ取得
         
@@ -129,12 +145,34 @@ Sub getBookList(htmlDoc As HTMLDocument, i As Integer, URLCol As Collection, Log
             'arrBooksIdにある場合は書籍があるので除外
             For Each checkId In arrBooksId
                 If checkId = getBookdataId Then
-                    checkIdFlag = True
+                    checkIdFlag = True 'WSあり、Webあり
                     Exit For
                 End If
+                test = test + 1
             Next checkId
             
-            If checkIdFlag = False Then URLCol.Add BookdataURLDir
+'            'WSなし、Webありを追加対象とする
+'            If checkIdFlag = False Then URLCol.Add BookdataURLDir
+            
+            'WSあり、Webありはワークシート書籍一覧から外す
+            If checkIdFlag = True Then
+                '要素切り詰め
+                For testi = test To UBound(arrBooksId) - 1
+                    arrBooksId(testi) = arrBooksId(testi + 1)
+                Next testi
+                If UBound(arrBooksId) - 1 = 0 Then
+                    arrBooksId(1) = "NoDeleteObject"
+                Else
+                    ReDim Preserve arrBooksId(1 To UBound(arrBooksId) - 1)
+                End If
+
+            'WSなし、Webありを追加対象とする
+            Else
+               URLCol.Add BookdataURLDir
+            End If
+            
+            
+            
             checkIdFlag = False
         '--detail情報からデータ取得ここまで
         
@@ -225,3 +263,20 @@ Sub getDetailBookdata(SWSheet As Worksheet, objIE As InternetExplorer, URLCol As
     Loop Until URLi > fornumber
     
 End Sub
+Sub deleteBookdata(SWSheet As Worksheet, arrBooksId As Variant, MaxRow As Long)
+
+    Dim deleteBook As Variant
+    Dim delBookStr As String
+    Dim delBookRow As Long
+    '削除書籍IDを取得して対象書籍を削除する
+    For Each deleteBook In arrBooksId
+        delBookRow = Columns(1).Find(deleteBook).Row 'ID番号で1列目の行を検索
+        delBookStr = deleteBook '文字列変換
+        SWSheet.Shapes(delBookStr).Delete '画像削除
+        Rows(delBookRow).Delete '行ごとテキスト削除
+        MaxRow = MaxRow - 1 '削除分最終行調整
+    Next deleteBook
+
+End Sub
+
+
